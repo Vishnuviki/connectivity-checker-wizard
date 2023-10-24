@@ -25,7 +25,7 @@ func main() {
 	// configure routes
 	mainController := new(controllers.MainController)
 	router.GET("/", mainController.Home)
-	router.POST("/api/question/:questionID", mainController.Questions)
+	router.POST("/api/rule/:ruleID", mainController.Execute)
 
 	router.Run(":8080")
 }

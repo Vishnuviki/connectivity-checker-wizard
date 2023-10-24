@@ -19,7 +19,7 @@ func buildQuestionOne(c *gin.Context) models.TemplateData {
 		"destination is configured as a raw IP, then you can continue!!", destinationAddress)
 	templateData.Name = "final-question.tmpl"
 	templateData.HTTPMethod = "post"
-	templateData.Endpoint = "/api/question/2"
+	templateData.Endpoint = "/api/rule/2"
 	return templateData
 }
 
@@ -31,7 +31,7 @@ func buildQuestionTwo(c *gin.Context) models.TemplateData {
 		"Now we will test the DNS lookup", sourceNamespace)
 	templateData.Name = "final-question.tmpl"
 	templateData.HTTPMethod = "get"
-	templateData.Endpoint = "/api/condition/2"
+	templateData.Endpoint = "/api/rule/3"
 	return templateData
 }
 
@@ -43,6 +43,6 @@ func buildQuestionThree(c *gin.Context) models.TemplateData {
 		"Because the destination is an IP address, we don't need to examine DNS", sourceNamespace)
 	templateData.Name = "final-question.tmpl"
 	templateData.HTTPMethod = "get"
-	templateData.Endpoint = "/api/condition/3"
+	templateData.Endpoint = "/api/rule/4"
 	return templateData
 }

@@ -4,15 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"conectivity-checker-wizard/models"
 )
 
-type CiliumResponse struct {
-	IsHostname  bool `json:"isHostname"`
-	IsIPAddress bool `json:"isIPAddress"`
-}
-
-func getCiliumNetworkPolicy(namespace string) CiliumResponse {
-	var res CiliumResponse
+func getCiliumNetworkPolicy(namespace string) models.CiliumResponse {
+	var res models.CiliumResponse
 	url := fmt.Sprintf("http://localhost:9090/api-sever/%s/my-cnp", namespace)
 
 	client := &http.Client{}

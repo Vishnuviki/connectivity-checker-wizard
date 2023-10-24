@@ -11,9 +11,9 @@ import (
 
 func HandlRequest(c *gin.Context, data models.FormData) models.TemplateData {
 	var responseData models.TemplateData
-	questionID, _ := strconv.Atoi(c.Param("questionID"))
+	ruleID, _ := strconv.Atoi(c.Param("ruleID"))
 
-	switch session := sessions.Default(c); questionID {
+	switch session := sessions.Default(c); ruleID {
 	case 1:
 		session.Clear()
 		startSession(c, data)
