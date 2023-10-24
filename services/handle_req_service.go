@@ -1,49 +1,43 @@
 package services
 
 import (
+	"strconv"
+
 	"conectivity-checker-wizard/models"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
-func HandlRequest(c *gin.Context, questionID int, data models.FormData) {
+func HandlRequest(c *gin.Context, data models.FormData) models.TemplateData {
+	var responseData models.TemplateData
+	questionID, _ := strconv.Atoi(c.Param("questionID"))
+
 	switch session := sessions.Default(c); questionID {
 	case 1:
 		session.Clear()
 		startSession(c, data)
-		buildQuestionOne(c)
+		responseData = buildQuestionOne(c)
 	case 2:
 		// API Call to API-SERVER - NW policy allows egress and destination is a hostname
 		sourceNamespace := session.Get("sourceNamespace").(string)
 		res := getCiliumNetworkPolicy(sourceNamespace)
 		if res.IsHostname {
-			buildQuestionTwo(c)
+			responseData = buildQuestionTwo(c)
 		} else if res.IsIPAddress {
-			buildQuestionThree(c)
+			responseData = buildQuestionThree(c)
 		} else {
-			buildNoEgressPolicyResponse(c)
+			return buildNoEgressPolicyResponse(c)
 		}
 	default:
 		session.Clear()
-		c.HTML(http.StatusOK, "thankyou.html", nil)
+		responseData = buildDefaultResponse()
 	}
+	return responseData
 }
 
 func startSession(c *gin.Context, data models.FormData) {
 	session := sessions.Default(c)
-	// Parsing values from the Form
-	// sourceCluster := c.PostForm("sourceCluster")
-	// sourceNamespace := c.PostForm("sourceNamespace")
-	// destinationPort := c.PostForm("destinationPort")
-	// destinationAddress := c.PostForm("destinationAddress")
-
-	// setting values to Session
-	// session.Set("sourceCluster", sourceCluster)
-	// session.Set("sourceNamespace", sourceNamespace)
-	// session.Set("destinationPort", destinationPort)
-	// session.Set("destinationAddress", destinationAddress)
-
 	session.Set("sourceNamespace", data.SourceNamespace)
 	session.Set("destinationPort", data.DestinationPort)
 	session.Set("destinationAddress", data.DestinationAddress)

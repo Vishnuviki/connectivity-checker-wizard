@@ -2,47 +2,47 @@ package services
 
 import (
 	"fmt"
-	"net/http"
+
+	"conectivity-checker-wizard/models"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
-func buildQuestionOne(c *gin.Context) {
+func buildQuestionOne(c *gin.Context) models.TemplateData {
+	templateData := models.TemplateData{}
 	session := sessions.Default(c)
 	destinationAddress := session.Get("destinationAddress")
-	fmt.Println("DESTINATION-ADDRESS: ", destinationAddress)
-	question := fmt.Sprintf("Are you sure that your destination (%v) is an IP address and not a hostname? "+
+	templateData.Content = fmt.Sprintf("Are you sure that your destination (%v) is an IP address and not a hostname? "+
 		"The network filtering logic works based on how exactly "+
 		"your applicaton reaches out to an external destination. If your "+
 		"destination is configured as a raw IP, then you can continue!!", destinationAddress)
-	c.HTML(http.StatusOK, "final-question.tmpl", gin.H{
-		"question":   question,
-		"httpMethod": "post",
-		"endpoint":   "/api/question/2",
-	})
+	templateData.Name = "final-question.tmpl"
+	templateData.HTTPMethod = "post"
+	templateData.Endpoint = "/api/question/2"
+	return templateData
 }
 
-func buildQuestionTwo(c *gin.Context) {
+func buildQuestionTwo(c *gin.Context) models.TemplateData {
+	templateData := models.TemplateData{}
 	session := sessions.Default(c)
 	sourceNamespace := session.Get("sourceNamespace")
-	question := fmt.Sprintf("Good news, the source Namespace (%v) has a network policy allowing this traffic out. "+
+	templateData.Content = fmt.Sprintf("Good news, the source Namespace (%v) has a network policy allowing this traffic out. "+
 		"Now we will test the DNS lookup", sourceNamespace)
-	c.HTML(http.StatusOK, "final-question.tmpl", gin.H{
-		"question":   question,
-		"httpMethod": "get",
-		"endpoint":   "/api/look-up-target",
-	})
+	templateData.Name = "final-question.tmpl"
+	templateData.HTTPMethod = "get"
+	templateData.Endpoint = "/api/condition/2"
+	return templateData
 }
 
-func buildQuestionThree(c *gin.Context) {
+func buildQuestionThree(c *gin.Context) models.TemplateData {
+	templateData := models.TemplateData{}
 	session := sessions.Default(c)
 	sourceNamespace := session.Get("sourceNamespace")
-	question := fmt.Sprintf("Good news, the source Namespace (%v) has a network policy allowing this traffic out. "+
+	templateData.Content = fmt.Sprintf("Good news, the source Namespace (%v) has a network policy allowing this traffic out. "+
 		"Because the destination is an IP address, we don't need to examine DNS", sourceNamespace)
-	c.HTML(http.StatusOK, "final-question.tmpl", gin.H{
-		"question":   question,
-		"httpMethod": "get",
-		"endpoint":   "/api/dns-lookup",
-	})
+	templateData.Name = "final-question.tmpl"
+	templateData.HTTPMethod = "get"
+	templateData.Endpoint = "/api/condition/3"
+	return templateData
 }
