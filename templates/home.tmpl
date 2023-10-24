@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bootstrap demo</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/styles.css" />
+    <!-- FONT -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Open+Sans"
+    />
+  </head>
+  <body class="body">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container">
+        <a class="navbar-brand" href="#">Connectivity Checker Wizard</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="#">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Contact</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <section
+      class="d-flex flex-column min-vh-100 justify-content-center align-items-center"
+    >
+      <div class="container">
+        <div class="row">
+          <div class="col-md-10 mx-auto rounded bg-white">
+            <div class="row">
+              <div class="col-md-5">
+                <div class="d-flex align-items-center justify-content-center">
+                  <img
+                    src="/static/logos/network.svg"
+                    alt="network-connectivity"
+                    class="img-fluid p-5"
+                  />
+                </div>
+              </div>
+
+              <div class="col-md-7">
+                <div class="m-5 text-center">
+                  <h1>Welcome!</h1>
+                </div>
+
+                <form class="m-5" action="/api/question/1" method="post">
+                  <div class="form-group mb-4">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="sourceNamespace"
+                      name="sourceNamespace"
+                      placeholder="Source Namespace"
+                      required
+                    />
+                  </div>
+
+                  <div class="form-group mb-4">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="destinationPort"
+                      name="destinationPort"
+                      placeholder="Destination Port"
+                      required
+                    />
+                  </div>
+
+                  <div class="form-group mb-4">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="destinationAddress"
+                      name="destinationAddress"
+                      placeholder="Destination Address"
+                      required
+                    />
+                  </div>
+
+                  <div class="d-grid col-6 mx-auto pt-4">
+                    <button class="btn btn-outline-primary" type="submit">
+                      Submit
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
