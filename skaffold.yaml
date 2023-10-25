@@ -1,0 +1,14 @@
+apiVersion: skaffold/v4beta6
+kind: Config
+metadata:
+  name: connectivity-wizard
+build:
+  artifacts:
+    - image: connectivity-wizard
+      docker:
+        dockerfile: Dockerfile
+  local:
+    useBuildkit: true
+manifests:
+  rawYaml:
+    - k8s/web.yaml

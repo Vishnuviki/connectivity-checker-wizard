@@ -1,0 +1,8 @@
+.idea
+k8s
+.dockerignore
+.gitignore
+Dockerfile
+Makefile
+README.md
+skaffold.yaml
