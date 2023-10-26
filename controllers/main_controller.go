@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 
+	"conectivity-checker-wizard/cilium"
 	"conectivity-checker-wizard/models"
 	"conectivity-checker-wizard/services"
 
@@ -25,4 +26,12 @@ func (mc *MainController) Execute(c *gin.Context) {
 		// handle error page
 		c.JSON(http.StatusInternalServerError, err.Error())
 	}
+}
+
+func (mc *MainController) CiliumPolicies(c *gin.Context) {
+	policies, err := cilium.GetCiliumNetworkPolicies("default")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	c.JSON(http.StatusOK, policies)
 }

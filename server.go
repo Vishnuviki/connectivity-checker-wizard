@@ -26,6 +26,7 @@ func main() {
 	mainController := new(controllers.MainController)
 	router.GET("/", mainController.Home)
 	router.POST("/api/rule/:ruleID", mainController.Execute)
+	router.GET("/cilium", mainController.CiliumPolicies)
 
 	router.Run(":8080")
 }
