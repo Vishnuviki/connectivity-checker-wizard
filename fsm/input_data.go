@@ -1,5 +1,9 @@
 package fsm
 
+import (
+	gonet "github.com/THREATINT/go-net"
+)
+
 type InputData struct {
 	SourceNamespace    string `form:"sourceNamespace"`
 	DestinationPort    string `form:"destinationPort"`
@@ -15,13 +19,11 @@ func newInputData(sourceNamespace, destinationPort, destinationAddress string) *
 }
 
 func (i *InputData) isDestinationAddressFQDN() bool {
-	// TODO: implement
-	return false
+	return gonet.IsFQDN(i.DestinationAddress)
 }
 
 func (i *InputData) isDestinationAddressIP() bool {
-	// TODO: implement
-	return false
+	return gonet.IsIPAddr(i.DestinationAddress)
 }
 
 func (i *InputData) isDestinationAddressValid() bool {
