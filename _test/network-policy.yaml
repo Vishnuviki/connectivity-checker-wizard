@@ -10,4 +10,5 @@ spec:
     - matchPattern: '*.slack.com'
     - matchPattern: slack.com
     - matchPattern: '*'
+    - matchPattern: 'sky.potato.com'
   endpointSelector: {}
