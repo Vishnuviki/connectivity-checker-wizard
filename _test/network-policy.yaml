@@ -1,0 +1,13 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: core-community-slack-bot-egress-policy
+spec:
+  description: Allow egress to googleapis and slack
+  egress:
+  - toFQDNs:
+    - matchPattern: '*.googleapis.com'
+    - matchPattern: '*.slack.com'
+    - matchPattern: slack.com
+    - matchPattern: '*'
+  endpointSelector: {}

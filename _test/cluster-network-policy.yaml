@@ -1,0 +1,32 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-host-dns-and-sniff
+spec:
+  egress:
+  - toEntities:
+    - host
+    - cluster
+    toPorts:
+    - ports:
+      - port: "53"
+        protocol: ANY
+      rules:
+        dns:
+        - matchPattern: '*'
+  endpointSelector: {}
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: cluster-allow-policy
+spec:
+  description: Policy allowing traffic internal to the cluster or the Sky network
+  egress:
+  - toEntities:
+    - cluster
+  - toCIDR:
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+  endpointSelector: {}
