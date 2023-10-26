@@ -34,7 +34,7 @@ func GetCiliumNetworkPolicies(namespace string) (*v2.CiliumNetworkPolicyList, er
 		return nil, err
 	}
 
-	policies, err := clientset.CiliumV2().CiliumNetworkPolicies("default").List(context.TODO(), metav1.ListOptions{})
+	policies, err := clientset.CiliumV2().CiliumNetworkPolicies(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		log.Println("Error reading cilium network policies", err)
 		return nil, err
