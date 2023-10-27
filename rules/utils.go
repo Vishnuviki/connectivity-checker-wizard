@@ -3,7 +3,6 @@ package rules
 import (
 	"fmt"
 
-	"conectivity-checker-wizard/fsm"
 	"conectivity-checker-wizard/models"
 
 	"github.com/gin-contrib/sessions"
@@ -16,9 +15,9 @@ func buildDefaultResponse(ruleName string) models.ResponseData {
 	return *responseData
 }
 
-func buildInputData(session sessions.Session) fsm.InputData {
+func buildInputData(session sessions.Session) models.InputData {
 	sourceNamespace := session.Get("sourceNamespace").(string)
 	destinationPort := session.Get("destinationPort").(string)
 	destinationAddress := session.Get("destinationAddress").(string)
-	return *fsm.NewInputData(sourceNamespace, destinationPort, destinationAddress)
+	return *models.NewInputData(sourceNamespace, destinationPort, destinationAddress)
 }

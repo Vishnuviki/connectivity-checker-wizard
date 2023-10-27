@@ -1,4 +1,4 @@
-package fsm
+package models
 
 import (
 	gonet "github.com/THREATINT/go-net"

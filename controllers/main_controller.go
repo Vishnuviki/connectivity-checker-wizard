@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"conectivity-checker-wizard/cilium"
-	"conectivity-checker-wizard/fsm"
+	"conectivity-checker-wizard/models"
 	"conectivity-checker-wizard/services"
 
 	"github.com/gin-gonic/gin"
@@ -17,7 +17,7 @@ func (mc *MainController) Home(c *gin.Context) {
 }
 
 func (mc *MainController) ValidateRule(c *gin.Context) {
-	var data fsm.InputData
+	var data models.InputData
 	if err := c.ShouldBind(&data); err == nil {
 		reponseTemplate := services.HandleValidationRequest(c, data)
 		c.HTML(http.StatusOK, reponseTemplate.Name, reponseTemplate)
