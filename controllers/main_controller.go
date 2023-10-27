@@ -1,13 +1,12 @@
 package controllers
 
 import (
+	"encoding/gob"
 	"net/http"
 
 	"conectivity-checker-wizard/cilium"
 	"conectivity-checker-wizard/models"
 	"conectivity-checker-wizard/services"
-
-	"encoding/gob"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -50,14 +49,14 @@ func (mc *MainController) HandleValidationRequest(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/")
 		return
 	} else {
-		responseData := services.HandleValidationRequest(c, data)
+		responseData := services.HandleAllRules(c, "validationRule")
 		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	}
 }
 
 func (mc *MainController) HandleOtherRequest(c *gin.Context) {
 	if ruleName := c.Param("ruleName"); ruleName != "" {
-		responseData := services.HandleOtherRequest(c, ruleName)
+		responseData := services.HandleAllRules(c, ruleName)
 		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	} else {
 		responseData := services.HandleInvalidRequest()

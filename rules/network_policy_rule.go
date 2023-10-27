@@ -7,9 +7,6 @@ import (
 
 	"conectivity-checker-wizard/cilium"
 	"conectivity-checker-wizard/models"
-
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
 )
 
 type NetworkPolicyRule struct {
@@ -34,13 +31,8 @@ func (r *NetworkPolicyRule) SetName(ruleName string) {
 	r.name = ruleName
 }
 
-// TODO: does this need to take gin.Context, inputData should be enough?
-// TODO: decouple from the web framework if possible
-func (r *NetworkPolicyRule) Execute(c *gin.Context) models.ResponseData {
+func (r *NetworkPolicyRule) Execute(inputData models.InputData) models.ResponseData {
 	log.Printf("Executing Rule: %s", NETWORK_POLICY_RULE)
-	session := sessions.Default(c)
-	inputData := session.Get("inputData").(models.InputData)
-
 	if inputData.IsDestinationAddressIP() {
 		fmt.Println("IsDestinationAddressIP")
 		return r.processIPAddressRequest(inputData)

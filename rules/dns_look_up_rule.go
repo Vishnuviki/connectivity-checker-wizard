@@ -6,8 +6,6 @@ import (
 	"net/http"
 
 	"conectivity-checker-wizard/models"
-
-	"github.com/gin-gonic/gin"
 )
 
 type DNSLookUPRule struct {
@@ -23,10 +21,10 @@ func (r *DNSLookUPRule) SetName(ruleName string) {
 	r.name = ruleName
 }
 
-func (r *DNSLookUPRule) Execute(c *gin.Context) models.ResponseData {
+func (r *DNSLookUPRule) Execute(inputData models.InputData) models.ResponseData {
 	log.Printf("Executing Rule: %s", DNS_LOOK_UP_RULE)
 	if r.nextRule != nil {
-		r.nextRule.Execute(c)
+		r.nextRule.Execute(inputData)
 	}
 	content := fmt.Sprintf("This is a %s Page", DNS_LOOK_UP_RULE)
 	return BuildResponseData(http.StatusOK, content, "response.tmpl")

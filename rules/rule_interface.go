@@ -1,12 +1,9 @@
 package rules
 
-import (
-	"conectivity-checker-wizard/models"
-	"github.com/gin-gonic/gin"
-)
+import "conectivity-checker-wizard/models"
 
 type Rule interface {
 	SetNextRule(nextRule Rule)
 	SetName(ruleName string)
-	Execute(c *gin.Context) models.ResponseData
+	Execute(inputData models.InputData) models.ResponseData
 }

@@ -6,9 +6,6 @@ import (
 	"net/http"
 
 	"conectivity-checker-wizard/models"
-
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
 )
 
 type ValidationRule struct {
@@ -24,17 +21,13 @@ func (r *ValidationRule) SetName(ruleName string) {
 	r.name = ruleName
 }
 
-// TODO: does this need to take gin.Context, inputData should be enough?
-// TODO: we should decouple this from the web framework if possible
-func (r *ValidationRule) Execute(c *gin.Context) models.ResponseData {
+func (r *ValidationRule) Execute(inputData models.InputData) models.ResponseData {
 	log.Printf("Executing Rule: %s", VALIDATION_RULE)
-	session := sessions.Default(c)
-	inputData := session.Get("inputData").(models.InputData)
 	if inputData.IsDestinationAddressIP() {
 		return buildResponse(inputData.DestinationAddress)
 	} else {
 		// execute networkPolicyRule
-		return r.nextRule.Execute(c)
+		return r.nextRule.Execute(inputData)
 	}
 }
 

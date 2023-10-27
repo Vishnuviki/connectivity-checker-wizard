@@ -7,22 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// func startSession(c *gin.Context, data models.InputData) {
-// 	session := sessions.Default(c)
-// 	session.Set("sourceNamespace", data.SourceNamespace)
-// 	session.Set("destinationPort", data.DestinationPort)
-// 	session.Set("destinationAddress", data.DestinationAddress)
-// 	session.Save()
-// }
-
-func HandleValidationRequest(c *gin.Context, formData models.InputData) models.ResponseData {
-	// session := sessions.Default(c)
-	// session.Clear()
-	// startSession(c, formData)
-	return HandleRules(c, "validationRule")
-}
-
-func HandleOtherRequest(c *gin.Context, ruleName string) models.ResponseData {
+func HandleAllRules(c *gin.Context, ruleName string) models.ResponseData {
 	return HandleRules(c, ruleName)
 }
 
