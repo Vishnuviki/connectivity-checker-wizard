@@ -10,7 +10,7 @@ type InputData struct {
 	DestinationAddress string `form:"destinationAddress"`
 }
 
-func newInputData(sourceNamespace, destinationPort, destinationAddress string) *InputData {
+func NewInputData(sourceNamespace, destinationPort, destinationAddress string) *InputData {
 	return &InputData{
 		SourceNamespace:    sourceNamespace,
 		DestinationPort:    destinationPort,
@@ -18,14 +18,14 @@ func newInputData(sourceNamespace, destinationPort, destinationAddress string) *
 	}
 }
 
-func (i *InputData) isDestinationAddressFQDN() bool {
+func (i *InputData) IsDestinationAddressFQDN() bool {
 	return gonet.IsFQDN(i.DestinationAddress)
 }
 
-func (i *InputData) isDestinationAddressIP() bool {
+func (i *InputData) IsDestinationAddressIP() bool {
 	return gonet.IsIPAddr(i.DestinationAddress)
 }
 
-func (i *InputData) isDestinationAddressValid() bool {
-	return i.isDestinationAddressFQDN() || i.isDestinationAddressIP()
+func (i *InputData) IsDestinationAddressValid() bool {
+	return i.IsDestinationAddressFQDN() || i.IsDestinationAddressIP()
 }

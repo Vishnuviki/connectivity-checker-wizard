@@ -2,6 +2,7 @@ package main
 
 import (
 	"conectivity-checker-wizard/controllers"
+	"conectivity-checker-wizard/services"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -16,17 +17,21 @@ func main() {
 	store := cookie.NewStore([]byte("secret"))
 	router.Use(sessions.Sessions("mysession", store))
 
+	// create rule map
+	services.CreateRuleMap()
+
 	// load all the templates
 	router.LoadHTMLGlob("templates/*")
 
-	// Serve static files (e.g., css, js, images)
+	// serve static files (e.g., css, js, images)
 	router.Static("/static/", "./static/")
 
 	// configure routes
 	mainController := new(controllers.MainController)
 	router.GET("/", mainController.Home)
-	router.POST("/api/rule/:ruleID", mainController.Execute)
 	router.GET("/cilium", mainController.CiliumPolicies)
+	router.POST("/validate", mainController.ValidateRule)
+	router.POST("/rule/:ruleName", mainController.ExecuteRules)
 
 	router.Run(":8080")
 }

@@ -1,6 +1,7 @@
 package models
 
-type TemplateData struct {
+type ResponseData struct {
+	// add needed attributes
 	Name       string
 	Content    string
 	HTTPMethod string
