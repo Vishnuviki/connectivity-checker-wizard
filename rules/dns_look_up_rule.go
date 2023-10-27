@@ -1,7 +1,9 @@
 package rules
 
 import (
+	"fmt"
 	"log"
+	"net/http"
 
 	"conectivity-checker-wizard/models"
 
@@ -26,5 +28,6 @@ func (r *DNSLookUPRule) Execute(c *gin.Context) models.ResponseData {
 	if r.nextRule != nil {
 		r.nextRule.Execute(c)
 	}
-	return buildDefaultResponse(DNS_LOOK_UP_RULE)
+	content := fmt.Sprintf("This is a %s Page", DNS_LOOK_UP_RULE)
+	return BuildResponseData(http.StatusOK, content, "response.tmpl")
 }

@@ -20,11 +20,7 @@ func GetInstance() *RuleMap {
 	return instance
 }
 
-func (rm *RuleMap) GetRuleByName(ruleName string) Rule {
-	for name, r := range rm.Map {
-		if name == ruleName {
-			return r
-		}
-	}
-	return nil
+func (rm *RuleMap) GetRuleByName(ruleName string) (Rule, bool) {
+	v, ok := rm.Map[ruleName]
+	return v, ok
 }

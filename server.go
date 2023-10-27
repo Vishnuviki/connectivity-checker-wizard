@@ -29,9 +29,10 @@ func main() {
 	// configure routes
 	mainController := new(controllers.MainController)
 	router.GET("/", mainController.Home)
+	router.GET("/rule/*any", mainController.Error)
 	router.GET("/cilium", mainController.CiliumPolicies)
-	router.POST("/validate", mainController.ValidateRule)
-	router.POST("/rule/:ruleName", mainController.ExecuteRules)
+	router.POST("/validate", mainController.HandleValidationRequest)
+	router.POST("/rule/:ruleName", mainController.HandleOtherRequest)
 
 	router.Run(":8080")
 }

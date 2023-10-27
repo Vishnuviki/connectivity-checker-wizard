@@ -31,7 +31,7 @@ func (mc *MainController) Home(c *gin.Context) {
 	})
 }
 
-func (mc *MainController) ValidateRule(c *gin.Context) {
+func (mc *MainController) HandleValidationRequest(c *gin.Context) {
 	var data models.InputData
 	session := sessions.Default(c)
 	err := c.ShouldBind(&data)
@@ -44,26 +44,30 @@ func (mc *MainController) ValidateRule(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
-
 	if !data.IsDestinationAddressValid() {
 		session.AddFlash("Validation failed: Destination address not valid, must be IP or FQDN")
 		session.Save()
 		c.Redirect(http.StatusFound, "/")
 		return
+	} else {
+		responseData := services.HandleValidationRequest(c, data)
+		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	}
-
-	reponseTemplate := services.HandleValidationRequest(c, data)
-	c.HTML(http.StatusOK, reponseTemplate.Name, reponseTemplate)
 }
 
-func (mc *MainController) ExecuteRules(c *gin.Context) {
+func (mc *MainController) HandleOtherRequest(c *gin.Context) {
 	if ruleName := c.Param("ruleName"); ruleName != "" {
-		reponseTemplate := services.HandleRequest(c, ruleName)
-		c.HTML(http.StatusOK, reponseTemplate.Name, reponseTemplate)
+		responseData := services.HandleOtherRequest(c, ruleName)
+		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	} else {
-		// handle error page
-		// TODO - Show invalid page
+		responseData := services.HandleInvalidRequest()
+		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	}
+}
+
+func (mc *MainController) Error(c *gin.Context) {
+	responseData := services.HandleInvalidRequest()
+	c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 }
 
 func (mc *MainController) CiliumPolicies(c *gin.Context) {
