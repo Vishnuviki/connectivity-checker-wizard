@@ -74,7 +74,6 @@ func (r *NetworkPolicyRule) processIPAddressRequest(input models.InputData) mode
 	if isAvailable {
 		return buildIPAddressResponse(input.SourceNamespace)
 	} else {
-		fmt.Println("ELSE")
 		return buildNoEgressPolicyResponse(input.DestinationPort, input.DestinationAddress)
 	}
 }
