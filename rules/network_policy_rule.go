@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"conectivity-checker-wizard/fsm"
 	"conectivity-checker-wizard/models"
 
 	"github.com/gin-contrib/sessions"
@@ -38,7 +37,7 @@ func (r *NetworkPolicyRule) Execute(c *gin.Context) models.ResponseData {
 	}
 }
 
-func processFQDNRequest(input fsm.InputData) models.ResponseData {
+func processFQDNRequest(input models.InputData) models.ResponseData {
 	isAvailable := checkFQDNEgreesRules(input.SourceNamespace, input.DestinationAddress)
 	if isAvailable {
 		return buildFQDNResponse(input.SourceNamespace)
@@ -47,7 +46,7 @@ func processFQDNRequest(input fsm.InputData) models.ResponseData {
 	}
 }
 
-func processIPAddressRequest(input fsm.InputData) models.ResponseData {
+func processIPAddressRequest(input models.InputData) models.ResponseData {
 	isAvailable := checkIPAddressEgressRules(input.SourceNamespace, input.DestinationAddress)
 	if isAvailable {
 		return buildIPAddressResponse(input.SourceNamespace)
