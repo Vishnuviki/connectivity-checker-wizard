@@ -24,7 +24,7 @@ func HandleRules(c *gin.Context, ruleName string) models.ResponseData {
 		// execute rule
 		return rule.Execute(c)
 	} else {
-		return r.BuildResponseData(http.StatusNotFound, "Page not Found.", "page-not-found.tmpl")
+		return r.BuildResponseData(http.StatusNotFound, "Page Not Found.", "page-not-found.tmpl")
 	}
 }
 

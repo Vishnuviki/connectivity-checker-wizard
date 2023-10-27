@@ -29,7 +29,7 @@ func HandleOtherRequest(c *gin.Context, ruleName string) models.ResponseData {
 func HandleInvalidRequest() models.ResponseData {
 	return models.ResponseData{
 		TemplateName: "page-not-found.tmpl",
-		Content:      "Page not Found.",
+		Content:      "Page Not Found.",
 		HTTPStatus:   http.StatusNotFound,
 	}
 }
