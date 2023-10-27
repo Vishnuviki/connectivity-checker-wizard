@@ -33,10 +33,12 @@ func (r *NetworkPolicyRule) SetName(ruleName string) {
 	r.name = ruleName
 }
 
+// TODO: does this need to take gin.Context, inputData should be enough?
+// TODO: decouple from the web framework if possible
 func (r *NetworkPolicyRule) Execute(c *gin.Context) models.ResponseData {
 	log.Printf("Executing Rule: %s", NETWORK_POLICY_RULE)
 	session := sessions.Default(c)
-	inputData := buildInputData(session)
+	inputData := session.Get("inputData").(models.InputData)
 
 	if inputData.IsDestinationAddressIP() {
 		fmt.Println("IsDestinationAddressIP")
