@@ -5,15 +5,16 @@ import (
 	"log"
 	"net/http"
 
+	i "conectivity-checker-wizard/interfaces"
 	"conectivity-checker-wizard/models"
 )
 
 type ValidationRule struct {
 	name     string
-	nextRule Rule // may be we can make it a List
+	nextRule i.Rule // may be we can make it a List
 }
 
-func (r *ValidationRule) SetNextRule(nextRule Rule) {
+func (r *ValidationRule) SetNextRule(nextRule i.Rule) {
 	r.nextRule = nextRule
 }
 

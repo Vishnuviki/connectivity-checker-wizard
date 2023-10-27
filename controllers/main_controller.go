@@ -4,9 +4,9 @@ import (
 	"encoding/gob"
 	"net/http"
 
-	"conectivity-checker-wizard/cilium"
 	"conectivity-checker-wizard/models"
-	"conectivity-checker-wizard/services"
+	"conectivity-checker-wizard/rulemanager/handler"
+	"conectivity-checker-wizard/services/cilium"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -42,30 +42,31 @@ func (mc *MainController) HandleValidationRequest(c *gin.Context) {
 		session.Save()
 		c.Redirect(http.StatusFound, "/")
 		return
-	}
-	if !data.IsDestinationAddressValid() {
+	} else if !data.IsDestinationAddressValid() {
+		// TODO: what happen if user types `slack.com`??
+		// We need to change the logic of checking FQDN
 		session.AddFlash("Validation failed: Destination address not valid, must be IP or FQDN")
 		session.Save()
 		c.Redirect(http.StatusFound, "/")
 		return
 	} else {
-		responseData := services.HandleAllRules(c, "validationRule")
+		responseData := handler.HandleRules(c, "validationRule")
 		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	}
 }
 
 func (mc *MainController) HandleOtherRequest(c *gin.Context) {
 	if ruleName := c.Param("ruleName"); ruleName != "" {
-		responseData := services.HandleAllRules(c, ruleName)
+		responseData := handler.HandleRules(c, ruleName)
 		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	} else {
-		responseData := services.HandleInvalidRequest()
+		responseData := handleInvalidRequest()
 		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	}
 }
 
 func (mc *MainController) Error(c *gin.Context) {
-	responseData := services.HandleInvalidRequest()
+	responseData := handleInvalidRequest()
 	c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 }
 
@@ -75,4 +76,12 @@ func (mc *MainController) CiliumPolicies(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	c.JSON(http.StatusOK, policies)
+}
+
+func handleInvalidRequest() models.ResponseData {
+	return models.ResponseData{
+		TemplateName: "page-not-found.tmpl",
+		Content:      "Page Not Found.",
+		HTTPStatus:   http.StatusNotFound,
+	}
 }

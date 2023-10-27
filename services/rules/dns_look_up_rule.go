@@ -5,15 +5,17 @@ import (
 	"log"
 	"net/http"
 
+	i "conectivity-checker-wizard/interfaces"
 	"conectivity-checker-wizard/models"
+	"conectivity-checker-wizard/utils"
 )
 
 type DNSLookUPRule struct {
 	name     string
-	nextRule Rule
+	nextRule i.Rule
 }
 
-func (r *DNSLookUPRule) SetNextRule(nextRule Rule) {
+func (r *DNSLookUPRule) SetNextRule(nextRule i.Rule) {
 	r.nextRule = nextRule
 }
 
@@ -27,5 +29,5 @@ func (r *DNSLookUPRule) Execute(inputData models.InputData) models.ResponseData 
 		r.nextRule.Execute(inputData)
 	}
 	content := fmt.Sprintf("This is a %s Page", DNS_LOOK_UP_RULE)
-	return BuildResponseData(http.StatusOK, content, "response.tmpl")
+	return utils.BuildResponseData(http.StatusOK, content, "response.tmpl")
 }

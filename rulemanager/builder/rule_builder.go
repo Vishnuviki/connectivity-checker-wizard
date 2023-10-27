@@ -1,34 +1,18 @@
-package services
+package builder
 
 import (
-	"net/http"
-
-	"conectivity-checker-wizard/cilium"
-	"conectivity-checker-wizard/models"
-	r "conectivity-checker-wizard/rules"
-
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
+	rm "conectivity-checker-wizard/rulemanager/rulemap"
+	"conectivity-checker-wizard/services/cilium"
+	r "conectivity-checker-wizard/services/rules"
 )
 
-var ruleMap = r.GetInstance()
+var ruleMap = rm.GetInstance()
 
-func CreateRuleMap() {
+func BuildRules() {
 	ruleMap.Map[r.DISPATCH_IP_RULE] = buildDispatchIPRule()
 	ruleMap.Map[r.DNS_LOOK_UP_RULE] = buildDNSLookUPRule()
 	ruleMap.Map[r.NETWORK_POLICY_RULE] = buildNetworkPolicyRule()
 	ruleMap.Map[r.VALIDATION_RULE] = buildValidationRule()
-}
-
-func HandleRules(c *gin.Context, ruleName string) models.ResponseData {
-	if rule, ok := ruleMap.GetRuleByName(ruleName); ok {
-		session := sessions.Default(c)
-		inputData := session.Get("inputData").(models.InputData)
-		// execute rule
-		return rule.Execute(inputData)
-	} else {
-		return r.BuildResponseData(http.StatusNotFound, "Page Not Found.", "page-not-found.tmpl")
-	}
 }
 
 func buildDispatchIPRule() *r.NetworkPolicyRule {

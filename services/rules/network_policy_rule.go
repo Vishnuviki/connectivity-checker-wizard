@@ -5,17 +5,18 @@ import (
 	"log"
 	"net/http"
 
-	"conectivity-checker-wizard/cilium"
+	i "conectivity-checker-wizard/interfaces"
 	"conectivity-checker-wizard/models"
+	"conectivity-checker-wizard/services/cilium"
 )
 
 type NetworkPolicyRule struct {
 	name                string
-	nextRule            Rule
+	nextRule            i.Rule
 	ciliumPolicyChecker cilium.CiliumPolicyChecker
 }
 
-func NewNetworkPolicyRule(name string, nextRule Rule, ciliumPolicyChecker cilium.CiliumPolicyChecker) *NetworkPolicyRule {
+func NewNetworkPolicyRule(name string, nextRule i.Rule, ciliumPolicyChecker cilium.CiliumPolicyChecker) *NetworkPolicyRule {
 	return &NetworkPolicyRule{
 		name:                name,
 		nextRule:            nextRule,
@@ -23,7 +24,7 @@ func NewNetworkPolicyRule(name string, nextRule Rule, ciliumPolicyChecker cilium
 	}
 }
 
-func (r *NetworkPolicyRule) SetNextRule(nextRule Rule) {
+func (r *NetworkPolicyRule) SetNextRule(nextRule i.Rule) {
 	r.nextRule = nextRule
 }
 

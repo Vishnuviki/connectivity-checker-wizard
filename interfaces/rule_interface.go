@@ -1,4 +1,4 @@
-package rules
+package interfaces
 
 import "conectivity-checker-wizard/models"
 
