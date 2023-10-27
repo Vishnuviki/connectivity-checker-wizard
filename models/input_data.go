@@ -5,9 +5,9 @@ import (
 )
 
 type InputData struct {
-	SourceNamespace    string `form:"sourceNamespace"`
-	DestinationPort    string `form:"destinationPort"`
-	DestinationAddress string `form:"destinationAddress"`
+	SourceNamespace    string `form:"sourceNamespace" binding:"required"`
+	DestinationPort    string `form:"destinationPort" binding:"required"`
+	DestinationAddress string `form:"destinationAddress" binding:"required"`
 }
 
 func NewInputData(sourceNamespace, destinationPort, destinationAddress string) *InputData {

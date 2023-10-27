@@ -5,7 +5,7 @@ import (
 
 	"conectivity-checker-wizard/models"
 
-	"github.com/gin-contrib/sessions"
+	// "github.com/gin-contrib/sessions"
 )
 
 func buildDefaultResponse(ruleName string) models.ResponseData {
@@ -15,9 +15,9 @@ func buildDefaultResponse(ruleName string) models.ResponseData {
 	return *responseData
 }
 
-func buildInputData(session sessions.Session) models.InputData {
-	sourceNamespace := session.Get("sourceNamespace").(string)
-	destinationPort := session.Get("destinationPort").(string)
-	destinationAddress := session.Get("destinationAddress").(string)
-	return *models.NewInputData(sourceNamespace, destinationPort, destinationAddress)
-}
+// func buildInputData(session sessions.Session) models.InputData {
+// 	sourceNamespace := session.Get("sourceNamespace").(string)
+// 	destinationPort := session.Get("destinationPort").(string)
+// 	destinationAddress := session.Get("destinationAddress").(string)
+// 	return *models.NewInputData(sourceNamespace, destinationPort, destinationAddress)
+// }
