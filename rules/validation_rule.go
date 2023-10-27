@@ -3,6 +3,7 @@ package rules
 import (
 	"fmt"
 	"log"
+	"net/http"
 
 	"conectivity-checker-wizard/models"
 
@@ -26,8 +27,13 @@ func (r *ValidationRule) SetName(ruleName string) {
 func (r *ValidationRule) Execute(c *gin.Context) models.ResponseData {
 	log.Printf("Executing Rule: %s", VALIDATION_RULE)
 	session := sessions.Default(c)
-	destinationAddress := session.Get("destinationAddress").(string)
-	return buildResponse(destinationAddress)
+	inputData := buildInputData(session)
+	if inputData.IsDestinationAddressIP() {
+		return buildResponse(inputData.DestinationAddress)
+	} else {
+		// execute networkPolicyRule
+		return r.nextRule.Execute(c)
+	}
 }
 
 func buildResponse(address string) models.ResponseData {
@@ -36,8 +42,9 @@ func buildResponse(address string) models.ResponseData {
 		"The network filtering logic works based on how exactly "+
 		"your applicaton reaches out to an external destination. If your "+
 		"destination is configured as a raw IP, then you can continue!!", address)
-	responseData.Name = "question.tmpl"
+	responseData.TemplateName = "question.tmpl"
 	responseData.HTTPMethod = "post"
+	responseData.HTTPStatus = http.StatusOK
 	responseData.Endpoint = "/rule/networkPolicyRule"
 	return *responseData
 }

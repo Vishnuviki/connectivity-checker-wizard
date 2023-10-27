@@ -3,6 +3,7 @@ package rules
 import (
 	"fmt"
 	"log"
+	"net/http"
 
 	"conectivity-checker-wizard/cilium"
 	"conectivity-checker-wizard/models"
@@ -73,6 +74,7 @@ func (r *NetworkPolicyRule) processIPAddressRequest(input models.InputData) mode
 	if isAvailable {
 		return buildIPAddressResponse(input.SourceNamespace)
 	} else {
+		fmt.Println("ELSE")
 		return buildNoEgressPolicyResponse(input.DestinationPort, input.DestinationAddress)
 	}
 }
@@ -81,8 +83,9 @@ func buildFQDNResponse(namespace string) models.ResponseData {
 	responseData := new(models.ResponseData)
 	responseData.Content = fmt.Sprintf("Good news, the source Namespace (%v) has a network policy allowing this traffic out. "+
 		"Now we will test the DNS lookup", namespace)
-	responseData.Name = "question.tmpl"
+	responseData.TemplateName = "question.tmpl"
 	responseData.HTTPMethod = "post"
+	responseData.HTTPStatus = http.StatusOK
 	responseData.Endpoint = "/rule/dnsLookUPRule"
 	return *responseData
 }
@@ -91,8 +94,9 @@ func buildIPAddressResponse(namespace string) models.ResponseData {
 	responseData := new(models.ResponseData)
 	responseData.Content = fmt.Sprintf("Good news, the source Namespace (%v) has a network policy allowing this traffic out. "+
 		"Because the destination is an IP address, we don't need to examine DNS", namespace)
-	responseData.Name = "question.tmpl"
+	responseData.TemplateName = "question.tmpl"
 	responseData.HTTPMethod = "post"
+	responseData.HTTPStatus = http.StatusOK
 	responseData.Endpoint = "/rule/dispatchIPRule"
 	return *responseData
 }
@@ -102,6 +106,7 @@ func buildNoEgressPolicyResponse(port, address string) models.ResponseData {
 	responseData.Content = fmt.Sprintf("Oops, There is no network policy allowing this egress traffic - "+
 		"link-to-docs-about-egress-policy - "+
 		"destinationPort: %s, destinationAddress: %s", port, address)
-	responseData.Name = "response.tmpl"
+	responseData.TemplateName = "response.tmpl"
+	responseData.HTTPStatus = http.StatusOK
 	return *responseData
 }

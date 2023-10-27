@@ -1,6 +1,8 @@
 package services
 
 import (
+	"net/http"
+
 	"conectivity-checker-wizard/models"
 
 	"github.com/gin-contrib/sessions"
@@ -19,14 +21,17 @@ func HandleValidationRequest(c *gin.Context, formData models.InputData) models.R
 	session := sessions.Default(c)
 	session.Clear()
 	startSession(c, formData)
-
-	if formData.IsDestinationAddressIP() {
-		return HandleRules(c, "validationRule")
-	} else {
-		return HandleRules(c, "networkPolicyRule")
-	}
+	return HandleRules(c, "validationRule")
 }
 
 func HandleRequest(c *gin.Context, ruleName string) models.ResponseData {
 	return HandleRules(c, ruleName)
+}
+
+func HandleInvalidRequest() models.ResponseData {
+	return models.ResponseData{
+		TemplateName: "page-not-found.tmpl",
+		Content:      "Page not Found.",
+		HTTPStatus:   http.StatusNotFound,
+	}
 }

@@ -16,26 +16,30 @@ func (mc *MainController) Home(c *gin.Context) {
 	c.HTML(http.StatusOK, "home.tmpl", nil)
 }
 
-func (mc *MainController) ValidateRule(c *gin.Context) {
+func (mc *MainController) ValidationRule(c *gin.Context) {
 	var data models.InputData
 	if err := c.ShouldBind(&data); err == nil {
-		reponseTemplate := services.HandleValidationRequest(c, data)
-		c.HTML(http.StatusOK, reponseTemplate.Name, reponseTemplate)
+		responseData := services.HandleValidationRequest(c, data)
+		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	} else {
-		// handle error page
-		// TODO - Show Error or invalid page
-		c.JSON(http.StatusInternalServerError, err.Error())
+		responseData := services.HandleInvalidRequest()
+		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	}
 }
 
-func (mc *MainController) ExecuteRules(c *gin.Context) {
+func (mc *MainController) ExecuteOtherRules(c *gin.Context) {
 	if ruleName := c.Param("ruleName"); ruleName != "" {
-		reponseTemplate := services.HandleRequest(c, ruleName)
-		c.HTML(http.StatusOK, reponseTemplate.Name, reponseTemplate)
+		responseData := services.HandleRequest(c, ruleName)
+		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	} else {
-		// handle error page
-		// TODO - Show invalid page
+		responseData := services.HandleInvalidRequest()
+		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	}
+}
+
+func (mc *MainController) Error(c *gin.Context) {
+	responseData := services.HandleInvalidRequest()
+	c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 }
 
 func (mc *MainController) CiliumPolicies(c *gin.Context) {
