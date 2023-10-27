@@ -3,6 +3,7 @@ package services
 import (
 	"conectivity-checker-wizard/models"
 	r "conectivity-checker-wizard/rules"
+	"conectivity-checker-wizard/cilium"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,9 +24,8 @@ func HandleRules(c *gin.Context, ruleName string) models.ResponseData {
 }
 
 func buildDispatchIPRule() *r.NetworkPolicyRule {
-	rule := new(r.NetworkPolicyRule)
-	rule.SetName(r.NETWORK_POLICY_RULE)
-	rule.SetNextRule(nil)
+	cpc := cilium.InClusterCiliumPolicyChecker{}
+	rule := r.NewNetworkPolicyRule(r.NETWORK_POLICY_RULE, nil, cpc)
 	return rule
 }
 
@@ -37,7 +37,8 @@ func buildDNSLookUPRule() *r.DNSLookUPRule {
 }
 
 func buildNetworkPolicyRule() *r.NetworkPolicyRule {
-	rule := new(r.NetworkPolicyRule)
+	cpc := cilium.InClusterCiliumPolicyChecker{}
+	rule := r.NewNetworkPolicyRule(r.NETWORK_POLICY_RULE, nil, cpc)
 	rule.SetName(r.NETWORK_POLICY_RULE)
 	rule.SetNextRule(nil)
 	return rule
