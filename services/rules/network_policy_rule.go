@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	c "conectivity-checker-wizard/constants"
 	i "conectivity-checker-wizard/interfaces"
 	"conectivity-checker-wizard/models"
 	"conectivity-checker-wizard/services/cilium"
@@ -33,7 +34,7 @@ func (r *NetworkPolicyRule) SetName(ruleName string) {
 }
 
 func (r *NetworkPolicyRule) Execute(inputData models.InputData) models.ResponseData {
-	log.Printf("Executing Rule: %s", NETWORK_POLICY_RULE)
+	log.Printf("Executing Rule: %s", c.NETWORK_POLICY_RULE)
 	if inputData.IsDestinationAddressIP() {
 		fmt.Println("IsDestinationAddressIP")
 		return r.processIPAddressRequest(inputData)

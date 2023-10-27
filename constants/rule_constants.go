@@ -1,4 +1,4 @@
-package rules
+package constants
 
 const (
 	DISPATCH_IP_RULE    = "dispatchIPRule"

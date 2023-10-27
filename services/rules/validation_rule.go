@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	c "conectivity-checker-wizard/constants"
 	i "conectivity-checker-wizard/interfaces"
 	"conectivity-checker-wizard/models"
 )
@@ -23,7 +24,7 @@ func (r *ValidationRule) SetName(ruleName string) {
 }
 
 func (r *ValidationRule) Execute(inputData models.InputData) models.ResponseData {
-	log.Printf("Executing Rule: %s", VALIDATION_RULE)
+	log.Printf("Executing Rule: %s", c.VALIDATION_RULE)
 	if inputData.IsDestinationAddressIP() {
 		return buildResponse(inputData.DestinationAddress)
 	} else {
