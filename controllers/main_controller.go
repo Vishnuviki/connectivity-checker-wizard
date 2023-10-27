@@ -16,7 +16,7 @@ func (mc *MainController) Home(c *gin.Context) {
 	c.HTML(http.StatusOK, "home.tmpl", nil)
 }
 
-func (mc *MainController) ValidationRule(c *gin.Context) {
+func (mc *MainController) ExecuteValidationRule(c *gin.Context) {
 	var data models.InputData
 	if err := c.ShouldBind(&data); err == nil {
 		responseData := services.HandleValidationRequest(c, data)
