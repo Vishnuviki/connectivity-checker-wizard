@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"conectivity-checker-wizard/cilium"
 	"conectivity-checker-wizard/models"
 
 	"github.com/gin-contrib/sessions"
@@ -11,8 +12,17 @@ import (
 )
 
 type NetworkPolicyRule struct {
-	name     string
-	nextRule Rule
+	name                string
+	nextRule            Rule
+	ciliumPolicyChecker cilium.CiliumPolicyChecker
+}
+
+func NewNetworkPolicyRule(name string, nextRule Rule, ciliumPolicyChecker cilium.CiliumPolicyChecker) *NetworkPolicyRule {
+	return &NetworkPolicyRule{
+		name:                name,
+		nextRule:            nextRule,
+		ciliumPolicyChecker: ciliumPolicyChecker,
+	}
 }
 
 func (r *NetworkPolicyRule) SetNextRule(nextRule Rule) {
@@ -30,15 +40,21 @@ func (r *NetworkPolicyRule) Execute(c *gin.Context) models.ResponseData {
 
 	if inputData.IsDestinationAddressIP() {
 		fmt.Println("IsDestinationAddressIP")
-		return processIPAddressRequest(inputData)
+		return r.processIPAddressRequest(inputData)
 	} else {
 		fmt.Println("IsDestinationAddressFQDN")
-		return processFQDNRequest(inputData)
+		return r.processFQDNRequest(inputData)
 	}
 }
 
-func processFQDNRequest(input models.InputData) models.ResponseData {
-	isAvailable := checkFQDNEgreesRules(input.SourceNamespace, input.DestinationAddress)
+func (r *NetworkPolicyRule) processFQDNRequest(input models.InputData) models.ResponseData {
+	isAvailable, err := r.ciliumPolicyChecker.CheckFQDNAllowedByPolicyInNamespace(input.DestinationAddress, input.SourceNamespace)
+	if err != nil {
+		// TODO: error handling ??? we cannot just ignore it or say it is not allowed.
+		// true/false from CheckFQDNAllowedByPolicyInNamespace is not enough
+		// if there is an error we probably need to surface it to the user?
+		log.Println(err)
+	}
 	if isAvailable {
 		return buildFQDNResponse(input.SourceNamespace)
 	} else {
@@ -46,8 +62,14 @@ func processFQDNRequest(input models.InputData) models.ResponseData {
 	}
 }
 
-func processIPAddressRequest(input models.InputData) models.ResponseData {
-	isAvailable := checkIPAddressEgressRules(input.SourceNamespace, input.DestinationAddress)
+func (r *NetworkPolicyRule) processIPAddressRequest(input models.InputData) models.ResponseData {
+	isAvailable, err := r.ciliumPolicyChecker.CheckIPAllowedByPolicyInNamespace(input.DestinationAddress, input.SourceNamespace)
+	if err != nil {
+		// TODO: error handling ??? we cannot just ignore it or say it is not allowed.
+		// true/false from CheckIPAllowedByPolicyInNamespace is not enough
+		// if there is an error we probably need to surface it to the user?
+		log.Println(err)
+	}
 	if isAvailable {
 		return buildIPAddressResponse(input.SourceNamespace)
 	} else {
