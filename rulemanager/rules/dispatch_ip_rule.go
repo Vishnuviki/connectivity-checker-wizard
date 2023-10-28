@@ -5,10 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	c "conectivity-checker-wizard/constants"
+	"conectivity-checker-wizard/constants"
 	"conectivity-checker-wizard/models"
 	i "conectivity-checker-wizard/rulemanager/interfaces"
-	"conectivity-checker-wizard/utils"
 )
 
 type DispatchIPRule struct {
@@ -25,7 +24,11 @@ func (r *DispatchIPRule) SetName(ruleName string) {
 }
 
 func (r *DispatchIPRule) Execute(inputData models.InputData) models.ResponseData {
-	log.Printf("Executing Rule: %s", c.DISPATCH_IP_RULE)
-	content := fmt.Sprintf("This is a %s Page", c.DISPATCH_IP_RULE)
-	return utils.BuildResponseData(http.StatusOK, content, "response.tmpl")
+	log.Printf("Executing Rule: %s", constants.DISPATCH_IP_RULE)
+	content := fmt.Sprintf("This is a %s Page", constants.DISPATCH_IP_RULE)
+	return models.NewResponseDataBuilder().
+		WithHTTPStatus(http.StatusOK).
+		WithTemplateName("response.tmpl").
+		WithContent(content).
+		Build()
 }

@@ -1,9 +1,8 @@
 package handler
 
 import (
-	"net/http"
+	"log"
 
-	"conectivity-checker-wizard/constants"
 	"conectivity-checker-wizard/models"
 	"conectivity-checker-wizard/rulemanager/builder"
 	"conectivity-checker-wizard/rulemanager/rulemap"
@@ -26,6 +25,7 @@ func HandleRules(c *gin.Context, ruleName string) models.ResponseData {
 		// execute rule
 		return rule.Execute(inputData)
 	} else {
-		return utils.BuildResponseData(http.StatusNotFound, constants.PAGE_NOT_FOUND, "page-not-found.tmpl")
+		log.Printf("%s, is not existing in the RuleMap", ruleName)
+		return utils.BuildInvalidResponseData()
 	}
 }

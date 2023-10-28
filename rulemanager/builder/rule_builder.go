@@ -22,26 +22,16 @@ func buildDispatchIPRule(ruleMap *rulemap.RuleMap) {
 	ruleMap.AddRule(c.DISPATCH_IP_RULE, rule)
 }
 
+// dnsLookUPRule has a dependency with dispatchIPRule
 func buildDNSLookUPRule(ruleMap *rulemap.RuleMap) {
 	rule := new(rules.DNSLookUPRule)
 	rule.SetName(c.DNS_LOOK_UP_RULE)
 	if v, ok := ruleMap.GetRuleByName(c.DISPATCH_IP_RULE); ok {
 		rule.SetNextRule(v)
 	} else {
-		log.Printf("%s, is missing in the rule map\n", c.DNS_LOOK_UP_RULE)
+		log.Printf("%s, is missing in the rule map\n", c.DISPATCH_IP_RULE)
 	}
 	ruleMap.AddRule(c.DNS_LOOK_UP_RULE, rule)
-}
-
-func buildValidationRule(ruleMap *rulemap.RuleMap) {
-	rule := new(rules.ValidationRule)
-	rule.SetName(c.VALIDATION_RULE)
-	if v, ok := ruleMap.GetRuleByName(c.NETWORK_POLICY_RULE); ok {
-		rule.SetNextRule(v)
-	} else {
-		log.Printf("%s, is missing in the rule map\n", c.VALIDATION_RULE)
-	}
-	ruleMap.AddRule(c.VALIDATION_RULE, rule)
 }
 
 func buildNetworkPolicyRule(ruleMap *rulemap.RuleMap) {
@@ -50,4 +40,16 @@ func buildNetworkPolicyRule(ruleMap *rulemap.RuleMap) {
 	rule.SetName(c.NETWORK_POLICY_RULE)
 	rule.SetNextRule(nil)
 	ruleMap.AddRule(c.NETWORK_POLICY_RULE, rule)
+}
+
+// validationRule has a dependency with networkPolicyRule
+func buildValidationRule(ruleMap *rulemap.RuleMap) {
+	rule := new(rules.ValidationRule)
+	rule.SetName(c.VALIDATION_RULE)
+	if v, ok := ruleMap.GetRuleByName(c.NETWORK_POLICY_RULE); ok {
+		rule.SetNextRule(v)
+	} else {
+		log.Printf("%s, is missing in the rule map\n", c.NETWORK_POLICY_RULE)
+	}
+	ruleMap.AddRule(c.VALIDATION_RULE, rule)
 }

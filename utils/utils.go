@@ -1,13 +1,20 @@
 package utils
 
 import (
+	"net/http"
+
+	"conectivity-checker-wizard/constants"
 	"conectivity-checker-wizard/models"
 )
 
-func BuildResponseData(httpStatus int, content, templateName string) models.ResponseData {
-	responseData := new(models.ResponseData)
-	responseData.Content = content
-	responseData.TemplateName = templateName
-	responseData.HTTPStatus = httpStatus
-	return *responseData
+/*
+	Add reuseable code here
+*/
+
+func BuildInvalidResponseData() models.ResponseData {
+	return models.NewResponseDataBuilder().
+		WithHTTPStatus(http.StatusNotFound).
+		WithTemplateName("page-not-found.tmpl").
+		WithContent(constants.PAGE_NOT_FOUND).
+		Build()
 }

@@ -5,10 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	c "conectivity-checker-wizard/constants"
+	"conectivity-checker-wizard/constants"
 	"conectivity-checker-wizard/models"
 	i "conectivity-checker-wizard/rulemanager/interfaces"
-	"conectivity-checker-wizard/utils"
 )
 
 type DNSLookUPRule struct {
@@ -25,10 +24,11 @@ func (r *DNSLookUPRule) SetName(ruleName string) {
 }
 
 func (r *DNSLookUPRule) Execute(inputData models.InputData) models.ResponseData {
-	log.Printf("Executing Rule: %s", c.DNS_LOOK_UP_RULE)
-	if r.nextRule != nil {
-		r.nextRule.Execute(inputData)
-	}
-	content := fmt.Sprintf("This is a %s Page", c.DNS_LOOK_UP_RULE)
-	return utils.BuildResponseData(http.StatusOK, content, "response.tmpl")
+	log.Printf("Executing Rule: %s", constants.DNS_LOOK_UP_RULE)
+	content := fmt.Sprintf("This is a %s Page", constants.DNS_LOOK_UP_RULE)
+	return models.NewResponseDataBuilder().
+		WithHTTPStatus(http.StatusOK).
+		WithTemplateName("response.tmpl").
+		WithContent(content).
+		Build()
 }

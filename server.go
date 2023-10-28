@@ -32,7 +32,7 @@ func main() {
 	router.GET("/rule/*any", mainController.Error)
 	router.GET("/cilium", mainController.CiliumPolicies)
 	router.POST("/validate", mainController.HandleValidationRequest)
-	router.POST("/rule/:ruleName", mainController.HandleOtherRequest)
+	router.POST("/rule/:ruleName", mainController.HandleRuleRequest)
 
 	router.Run(":8080")
 }

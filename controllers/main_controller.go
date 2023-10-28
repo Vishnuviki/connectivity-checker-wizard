@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/gob"
+	"log"
 	"net/http"
 
 	"conectivity-checker-wizard/constants"
@@ -57,18 +58,19 @@ func (mc *MainController) HandleValidationRequest(c *gin.Context) {
 	}
 }
 
-func (mc *MainController) HandleOtherRequest(c *gin.Context) {
+func (mc *MainController) HandleRuleRequest(c *gin.Context) {
 	if ruleName := c.Param("ruleName"); ruleName != "" {
 		responseData := handler.HandleRules(c, ruleName)
 		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	} else {
-		responseData := handleInvalidRequest()
+		responseData := utils.BuildInvalidResponseData()
 		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	}
 }
 
 func (mc *MainController) Error(c *gin.Context) {
-	responseData := handleInvalidRequest()
+	log.Println("Invalid Request")
+	responseData := utils.BuildInvalidResponseData()
 	c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 }
 
@@ -78,8 +80,4 @@ func (mc *MainController) CiliumPolicies(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	c.JSON(http.StatusOK, policies)
-}
-
-func handleInvalidRequest() models.ResponseData {
-	return utils.BuildResponseData(http.StatusNotFound, constants.PAGE_NOT_FOUND, "page-not-found.tmpl")
 }
