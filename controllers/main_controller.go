@@ -4,9 +4,11 @@ import (
 	"encoding/gob"
 	"net/http"
 
+	"conectivity-checker-wizard/constants"
 	"conectivity-checker-wizard/models"
 	"conectivity-checker-wizard/rulemanager/handler"
 	"conectivity-checker-wizard/services/cilium"
+	"conectivity-checker-wizard/utils"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -50,7 +52,7 @@ func (mc *MainController) HandleValidationRequest(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/")
 		return
 	} else {
-		responseData := handler.HandleRules(c, "validationRule")
+		responseData := handler.HandleRules(c, constants.VALIDATION_RULE)
 		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	}
 }
@@ -79,9 +81,5 @@ func (mc *MainController) CiliumPolicies(c *gin.Context) {
 }
 
 func handleInvalidRequest() models.ResponseData {
-	return models.ResponseData{
-		TemplateName: "page-not-found.tmpl",
-		Content:      "Page Not Found.",
-		HTTPStatus:   http.StatusNotFound,
-	}
+	return utils.BuildResponseData(http.StatusNotFound, constants.PAGE_NOT_FOUND, "page-not-found.tmpl")
 }

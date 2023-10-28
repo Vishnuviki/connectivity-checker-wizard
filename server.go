@@ -2,7 +2,7 @@ package main
 
 import (
 	"conectivity-checker-wizard/controllers"
-	"conectivity-checker-wizard/rulemanager/builder"
+	"conectivity-checker-wizard/rulemanager/handler"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -17,8 +17,8 @@ func main() {
 	store := cookie.NewStore([]byte("secret"))
 	router.Use(sessions.Sessions("mysession", store))
 
-	// build rules
-	builder.BuildRules()
+	// build rules and create RuleMap
+	handler.BuildRuleMap()
 
 	// load all the templates
 	router.LoadHTMLGlob("views/templates/*")

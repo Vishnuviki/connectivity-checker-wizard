@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	c "conectivity-checker-wizard/constants"
-	i "conectivity-checker-wizard/interfaces"
 	"conectivity-checker-wizard/models"
+	i "conectivity-checker-wizard/rulemanager/interfaces"
 	"conectivity-checker-wizard/services/cilium"
 )
 

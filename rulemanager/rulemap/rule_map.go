@@ -3,11 +3,11 @@ package rulemap
 import (
 	"sync"
 
-	i "conectivity-checker-wizard/interfaces"
+	i "conectivity-checker-wizard/rulemanager/interfaces"
 )
 
 type RuleMap struct {
-	Map map[string]i.Rule
+	m map[string]i.Rule
 }
 
 var instance *RuleMap
@@ -19,12 +19,16 @@ func GetInstance() *RuleMap {
 	// The once.Do function will guarantee that the initialization code is executed only once.
 	once.Do(func() {
 		instance = new(RuleMap)
-		instance.Map = make(map[string]i.Rule)
+		instance.m = make(map[string]i.Rule)
 	})
 	return instance
 }
 
 func (rm *RuleMap) GetRuleByName(ruleName string) (i.Rule, bool) {
-	v, ok := rm.Map[ruleName]
+	v, ok := rm.m[ruleName]
 	return v, ok
+}
+
+func (rm *RuleMap) AddRule(ruleName string, rule i.Rule) {
+	rm.m[ruleName] = rule
 }
