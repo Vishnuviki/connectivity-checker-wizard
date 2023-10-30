@@ -24,9 +24,9 @@ func (r *DNSLookUPRule) SetName(ruleName string) {
 
 func (r *DNSLookUPRule) Execute(inputData models.InputData) models.ResponseData {
 	content := fmt.Sprintf("This is a %s Page", constants.DNS_LOOK_UP_RULE)
-	return models.NewResponseDataBuilder().
-		WithHTTPStatus(http.StatusOK).
-		WithTemplateName("response.tmpl").
-		WithTemplateContent(content).
-		Build()
+	return models.ResponseData{
+		HTTPStatus:      http.StatusOK,
+		TemplateName:    "response.tmpl",
+		TemplateContent: content,
+	}
 }

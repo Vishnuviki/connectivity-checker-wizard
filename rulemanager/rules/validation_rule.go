@@ -37,11 +37,11 @@ func buildResponse(destinationAddress string) models.ResponseData {
 		"The network filtering logic works based on how exactly "+
 		"your applicaton reaches out to an external destination. If your "+
 		"destination is configured as a raw IP, then you can continue!!", destinationAddress)
-	return models.NewResponseDataBuilder().
-		WithHTTPStatus(http.StatusOK).
-		WithTemplateName("question.tmpl").
-		WithTemplateContent(content).
-		WithTemplateFormMethod(http.MethodPost).
-		WithTemplateFormAction("/rule/networkPolicyRule").
-		Build()
+	return models.ResponseData{
+		HTTPStatus:         http.StatusOK,
+		TemplateName:       "question.tmpl",
+		TemplateContent:    content,
+		TemplateFormMethod: http.MethodPost,
+		TemplateFormAction: "/rule/networkPolicyRule",
+	}
 }

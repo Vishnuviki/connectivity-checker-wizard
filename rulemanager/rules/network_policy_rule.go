@@ -63,44 +63,44 @@ func processIPAddressRequest(input models.InputData) models.ResponseData {
 func buildFQDNResponse(sourceNamespace string) models.ResponseData {
 	content := fmt.Sprintf("Good news, the source Namespace (%v) has a network policy allowing this traffic out. "+
 		"Now we will test the DNS lookup", sourceNamespace)
-	return models.NewResponseDataBuilder().
-		WithHTTPStatus(http.StatusOK).
-		WithTemplateName("question.tmpl").
-		WithTemplateContent(content).
-		WithTemplateFormMethod(http.MethodPost).
-		WithTemplateFormAction("/rule/dnsLookUPRule").
-		Build()
+	return models.ResponseData{
+		HTTPStatus:         http.StatusOK,
+		TemplateName:       "question.tmpl",
+		TemplateContent:    content,
+		TemplateFormMethod: http.MethodPost,
+		TemplateFormAction: "/rule/dnsLookUPRule",
+	}
 }
 
 func buildIPAddressResponse(sourceNamespace string) models.ResponseData {
 	content := fmt.Sprintf("Good news, the source Namespace (%v) has a network policy allowing this traffic out. "+
 		"Because the destination is an IP address, we don't need to examine DNS", sourceNamespace)
-	return models.NewResponseDataBuilder().
-		WithHTTPStatus(http.StatusOK).
-		WithTemplateName("question.tmpl").
-		WithTemplateContent(content).
-		WithTemplateFormMethod(http.MethodPost).
-		WithTemplateFormAction("/rule/dispatchIPRule").
-		Build()
+	return models.ResponseData{
+		HTTPStatus:         http.StatusOK,
+		TemplateName:       "question.tmpl",
+		TemplateContent:    content,
+		TemplateFormMethod: http.MethodPost,
+		TemplateFormAction: "/rule/dispatchIPRule",
+	}
 }
 
 func buildNoEgressPolicyResponse(port, address string) models.ResponseData {
 	// TODO - Append with relevant core-docs link
 	content := fmt.Sprintf("Oops, There is no network policy allowing this egress traffic - " +
 		"link-to-docs-about-egress-policy")
-	return models.NewResponseDataBuilder().
-		WithHTTPStatus(http.StatusOK).
-		WithTemplateName("response.tmpl").
-		WithTemplateContent(content).
-		Build()
+	return models.ResponseData{
+		HTTPStatus:      http.StatusOK,
+		TemplateName:    "response.tmpl",
+		TemplateContent: content,
+	}
 }
 
 func buildErrorResponse() models.ResponseData {
 	content := "We apologize for the inconvenience, as we're currently encountering some technical issues. " +
 		"Please get in touch with #core-support channel for further assistance."
-	return models.NewResponseDataBuilder().
-		WithHTTPStatus(http.StatusOK).
-		WithTemplateName("response.tmpl").
-		WithTemplateContent(content).
-		Build()
+	return models.ResponseData{
+		HTTPStatus:      http.StatusOK,
+		TemplateName:    "response.tmpl",
+		TemplateContent: content,
+	}
 }
