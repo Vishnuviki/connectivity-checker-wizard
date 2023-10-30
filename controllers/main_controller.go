@@ -1,13 +1,15 @@
 package controllers
 
 import (
+	"encoding/gob"
+	"log"
 	"net/http"
 
-	"conectivity-checker-wizard/cilium"
+	"conectivity-checker-wizard/constants"
 	"conectivity-checker-wizard/models"
-	"conectivity-checker-wizard/services"
-
-	"encoding/gob"
+	"conectivity-checker-wizard/rulemanager/handler"
+	"conectivity-checker-wizard/services/cilium"
+	"conectivity-checker-wizard/utils"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -31,7 +33,7 @@ func (mc *MainController) Home(c *gin.Context) {
 	})
 }
 
-func (mc *MainController) ValidateRule(c *gin.Context) {
+func (mc *MainController) HandleValidationRequest(c *gin.Context) {
 	var data models.InputData
 	session := sessions.Default(c)
 	err := c.ShouldBind(&data)
@@ -43,27 +45,33 @@ func (mc *MainController) ValidateRule(c *gin.Context) {
 		session.Save()
 		c.Redirect(http.StatusFound, "/")
 		return
-	}
-
-	if !data.IsDestinationAddressValid() {
+	} else if !data.IsDestinationAddressValid() {
+		// TODO: what happen if user types `slack.com`??
+		// We need to change the logic of checking FQDN
 		session.AddFlash("Validation failed: Destination address not valid, must be IP or FQDN")
 		session.Save()
 		c.Redirect(http.StatusFound, "/")
 		return
+	} else {
+		responseData := handler.HandleRules(c, constants.VALIDATION_RULE)
+		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	}
-
-	reponseTemplate := services.HandleValidationRequest(c, data)
-	c.HTML(http.StatusOK, reponseTemplate.Name, reponseTemplate)
 }
 
-func (mc *MainController) ExecuteRules(c *gin.Context) {
+func (mc *MainController) HandleRuleRequest(c *gin.Context) {
 	if ruleName := c.Param("ruleName"); ruleName != "" {
-		reponseTemplate := services.HandleRequest(c, ruleName)
-		c.HTML(http.StatusOK, reponseTemplate.Name, reponseTemplate)
+		responseData := handler.HandleRules(c, ruleName)
+		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	} else {
-		// handle error page
-		// TODO - Show invalid page
+		responseData := utils.BuildInvalidResponseData()
+		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	}
+}
+
+func (mc *MainController) Error(c *gin.Context) {
+	log.Println("Invalid Request")
+	responseData := utils.BuildInvalidResponseData()
+	c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 }
 
 func (mc *MainController) CiliumPolicies(c *gin.Context) {

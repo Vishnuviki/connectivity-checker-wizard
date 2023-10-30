@@ -3,21 +3,21 @@ package rules
 import (
 	"fmt"
 	"log"
+	"net/http"
 
-	"conectivity-checker-wizard/cilium"
+	c "conectivity-checker-wizard/constants"
 	"conectivity-checker-wizard/models"
-
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
+	i "conectivity-checker-wizard/rulemanager/interfaces"
+	"conectivity-checker-wizard/services/cilium"
 )
 
 type NetworkPolicyRule struct {
 	name                string
-	nextRule            Rule
+	nextRule            i.Rule
 	ciliumPolicyChecker cilium.CiliumPolicyChecker
 }
 
-func NewNetworkPolicyRule(name string, nextRule Rule, ciliumPolicyChecker cilium.CiliumPolicyChecker) *NetworkPolicyRule {
+func NewNetworkPolicyRule(name string, nextRule i.Rule, ciliumPolicyChecker cilium.CiliumPolicyChecker) *NetworkPolicyRule {
 	return &NetworkPolicyRule{
 		name:                name,
 		nextRule:            nextRule,
@@ -25,7 +25,7 @@ func NewNetworkPolicyRule(name string, nextRule Rule, ciliumPolicyChecker cilium
 	}
 }
 
-func (r *NetworkPolicyRule) SetNextRule(nextRule Rule) {
+func (r *NetworkPolicyRule) SetNextRule(nextRule i.Rule) {
 	r.nextRule = nextRule
 }
 
@@ -33,18 +33,11 @@ func (r *NetworkPolicyRule) SetName(ruleName string) {
 	r.name = ruleName
 }
 
-// TODO: does this need to take gin.Context, inputData should be enough?
-// TODO: decouple from the web framework if possible
-func (r *NetworkPolicyRule) Execute(c *gin.Context) models.ResponseData {
-	log.Printf("Executing Rule: %s", NETWORK_POLICY_RULE)
-	session := sessions.Default(c)
-	inputData := session.Get("inputData").(models.InputData)
-
+func (r *NetworkPolicyRule) Execute(inputData models.InputData) models.ResponseData {
+	log.Printf("Executing Rule: %s", c.NETWORK_POLICY_RULE)
 	if inputData.IsDestinationAddressIP() {
-		fmt.Println("IsDestinationAddressIP")
 		return r.processIPAddressRequest(inputData)
 	} else {
-		fmt.Println("IsDestinationAddressFQDN")
 		return r.processFQDNRequest(inputData)
 	}
 }
@@ -79,31 +72,37 @@ func (r *NetworkPolicyRule) processIPAddressRequest(input models.InputData) mode
 	}
 }
 
-func buildFQDNResponse(namespace string) models.ResponseData {
-	responseData := new(models.ResponseData)
-	responseData.Content = fmt.Sprintf("Good news, the source Namespace (%v) has a network policy allowing this traffic out. "+
-		"Now we will test the DNS lookup", namespace)
-	responseData.Name = "question.tmpl"
-	responseData.HTTPMethod = "post"
-	responseData.Endpoint = "/rule/dnsLookUPRule"
-	return *responseData
+func buildFQDNResponse(sourceNamespace string) models.ResponseData {
+	content := fmt.Sprintf("Good news, the source Namespace (%v) has a network policy allowing this traffic out. "+
+		"Now we will test the DNS lookup", sourceNamespace)
+	return models.NewResponseDataBuilder().
+		WithHTTPStatus(http.StatusOK).
+		WithHTTPMethod("post").
+		WithTemplateName("question.tmpl").
+		WithEndpoint("/rule/dnsLookUPRule").
+		WithContent(content).
+		Build()
 }
 
-func buildIPAddressResponse(namespace string) models.ResponseData {
-	responseData := new(models.ResponseData)
-	responseData.Content = fmt.Sprintf("Good news, the source Namespace (%v) has a network policy allowing this traffic out. "+
-		"Because the destination is an IP address, we don't need to examine DNS", namespace)
-	responseData.Name = "question.tmpl"
-	responseData.HTTPMethod = "post"
-	responseData.Endpoint = "/rule/dispatchIPRule"
-	return *responseData
+func buildIPAddressResponse(sourceNamespace string) models.ResponseData {
+	content := fmt.Sprintf("Good news, the source Namespace (%v) has a network policy allowing this traffic out. "+
+		"Because the destination is an IP address, we don't need to examine DNS", sourceNamespace)
+	return models.NewResponseDataBuilder().
+		WithHTTPStatus(http.StatusOK).
+		WithHTTPMethod("post").
+		WithTemplateName("question.tmpl").
+		WithEndpoint("/rule/dispatchIPRule").
+		WithContent(content).
+		Build()
 }
 
 func buildNoEgressPolicyResponse(port, address string) models.ResponseData {
-	responseData := new(models.ResponseData)
-	responseData.Content = fmt.Sprintf("Oops, There is no network policy allowing this egress traffic - "+
-		"link-to-docs-about-egress-policy - "+
-		"destinationPort: %s, destinationAddress: %s", port, address)
-	responseData.Name = "response.tmpl"
-	return *responseData
+	// TODO - Append with relevant core-docs link
+	content := fmt.Sprintf("Oops, There is no network policy allowing this egress traffic - " +
+		"link-to-docs-about-egress-policy")
+	return models.NewResponseDataBuilder().
+		WithHTTPStatus(http.StatusOK).
+		WithTemplateName("response.tmpl").
+		WithContent(content).
+		Build()
 }

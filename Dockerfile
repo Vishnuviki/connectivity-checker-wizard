@@ -11,8 +11,7 @@ FROM gcr.io/distroless/static:nonroot
 WORKDIR /app
 
 COPY --from=build-stage /connectivity-wizard /app/connectivity-wizard
-COPY static/ /app/static
-COPY templates/ /app/templates
+COPY views/ /app/views
 
 EXPOSE 8080
 USER nonroot:nonroot
