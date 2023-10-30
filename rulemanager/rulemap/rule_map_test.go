@@ -12,7 +12,7 @@ import (
 
 func TestRuleMap(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Query escalation Suite")
+	RunSpecs(t, "Test Rule Map Suite")
 }
 
 var _ = Describe("Testing query escalation required functions", func() {
