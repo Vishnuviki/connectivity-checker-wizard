@@ -42,7 +42,7 @@ var _ = Describe("Testing Rule Map functions", func() {
 		})
 	})
 
-	It("Shoud add rule into RuleMap", func() {
+	It("Should add rule into RuleMap", func() {
 		ruleMap.AddRule(c.NETWORK_POLICY_RULE, new(rules.NetworkPolicyRule))
 		rule, _ := ruleMap.GetRuleByName("networkPolicyRule")
 		Expect(rule).NotTo(BeNil())
