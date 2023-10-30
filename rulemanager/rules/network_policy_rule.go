@@ -5,51 +5,40 @@ import (
 	"log"
 	"net/http"
 
-	c "conectivity-checker-wizard/constants"
 	"conectivity-checker-wizard/models"
 	i "conectivity-checker-wizard/rulemanager/interfaces"
 	"conectivity-checker-wizard/services/cilium"
 )
 
 type NetworkPolicyRule struct {
-	name                string
-	nextRule            i.Rule
-	ciliumPolicyChecker cilium.CiliumPolicyChecker
-}
-
-func NewNetworkPolicyRule(name string, nextRule i.Rule, ciliumPolicyChecker cilium.CiliumPolicyChecker) *NetworkPolicyRule {
-	return &NetworkPolicyRule{
-		name:                name,
-		nextRule:            nextRule,
-		ciliumPolicyChecker: ciliumPolicyChecker,
-	}
-}
-
-func (r *NetworkPolicyRule) SetNextRule(nextRule i.Rule) {
-	r.nextRule = nextRule
+	name     string
+	nextRule i.Rule
 }
 
 func (r *NetworkPolicyRule) SetName(ruleName string) {
 	r.name = ruleName
 }
 
+func (r *NetworkPolicyRule) SetNextRule(nextRule i.Rule) {
+	r.nextRule = nextRule
+}
+
 func (r *NetworkPolicyRule) Execute(inputData models.InputData) models.ResponseData {
-	log.Printf("Executing Rule: %s", c.NETWORK_POLICY_RULE)
+	log.Printf("Executing Rule: %s", r.name)
 	if inputData.IsDestinationAddressIP() {
-		return r.processIPAddressRequest(inputData)
+		return processIPAddressRequest(inputData)
 	} else {
-		return r.processFQDNRequest(inputData)
+		return processFQDNRequest(inputData)
 	}
 }
 
-func (r *NetworkPolicyRule) processFQDNRequest(input models.InputData) models.ResponseData {
-	isAvailable, err := r.ciliumPolicyChecker.CheckFQDNAllowedByPolicyInNamespace(input.DestinationAddress, input.SourceNamespace)
+func processFQDNRequest(input models.InputData) models.ResponseData {
+	ciliumClient := cilium.NewCiliumClient()
+	policyList, err := ciliumClient.GetCiliumNetworkPolicies(input.SourceNamespace)
 	if err != nil {
-		// TODO: error handling ??? we cannot just ignore it or say it is not allowed.
-		// true/false from CheckFQDNAllowedByPolicyInNamespace is not enough
-		// if there is an error we probably need to surface it to the user?
-		log.Println(err)
+		return buildErrorResponse()
 	}
+	isAvailable := ciliumClient.CheckFQDNAllowedByPolicyInNamespace(input.DestinationAddress, policyList)
 	if isAvailable {
 		return buildFQDNResponse(input.SourceNamespace)
 	} else {
@@ -57,14 +46,13 @@ func (r *NetworkPolicyRule) processFQDNRequest(input models.InputData) models.Re
 	}
 }
 
-func (r *NetworkPolicyRule) processIPAddressRequest(input models.InputData) models.ResponseData {
-	isAvailable, err := r.ciliumPolicyChecker.CheckIPAllowedByPolicyInNamespace(input.DestinationAddress, input.SourceNamespace)
+func processIPAddressRequest(input models.InputData) models.ResponseData {
+	ciliumClient := cilium.NewCiliumClient()
+	policyList, err := ciliumClient.GetCiliumNetworkPolicies(input.SourceNamespace)
 	if err != nil {
-		// TODO: error handling ??? we cannot just ignore it or say it is not allowed.
-		// true/false from CheckIPAllowedByPolicyInNamespace is not enough
-		// if there is an error we probably need to surface it to the user?
-		log.Println(err)
+		return buildErrorResponse()
 	}
+	isAvailable := ciliumClient.CheckIPAllowedByPolicyInNamespace(input.DestinationAddress, policyList)
 	if isAvailable {
 		return buildIPAddressResponse(input.SourceNamespace)
 	} else {
@@ -77,10 +65,10 @@ func buildFQDNResponse(sourceNamespace string) models.ResponseData {
 		"Now we will test the DNS lookup", sourceNamespace)
 	return models.NewResponseDataBuilder().
 		WithHTTPStatus(http.StatusOK).
-		WithHTTPMethod("post").
 		WithTemplateName("question.tmpl").
-		WithEndpoint("/rule/dnsLookUPRule").
-		WithContent(content).
+		WithTemplateContent(content).
+		WithTemplateFormMethod(http.MethodPost).
+		WithTemplateFormAction("/rule/dnsLookUPRule").
 		Build()
 }
 
@@ -89,10 +77,10 @@ func buildIPAddressResponse(sourceNamespace string) models.ResponseData {
 		"Because the destination is an IP address, we don't need to examine DNS", sourceNamespace)
 	return models.NewResponseDataBuilder().
 		WithHTTPStatus(http.StatusOK).
-		WithHTTPMethod("post").
 		WithTemplateName("question.tmpl").
-		WithEndpoint("/rule/dispatchIPRule").
-		WithContent(content).
+		WithTemplateContent(content).
+		WithTemplateFormMethod(http.MethodPost).
+		WithTemplateFormAction("/rule/dispatchIPRule").
 		Build()
 }
 
@@ -103,6 +91,16 @@ func buildNoEgressPolicyResponse(port, address string) models.ResponseData {
 	return models.NewResponseDataBuilder().
 		WithHTTPStatus(http.StatusOK).
 		WithTemplateName("response.tmpl").
-		WithContent(content).
+		WithTemplateContent(content).
+		Build()
+}
+
+func buildErrorResponse() models.ResponseData {
+	content := "We apologize for the inconvenience, as we're currently encountering some technical issues. " +
+		"Please get in touch with #core-support channel for further assistance."
+	return models.NewResponseDataBuilder().
+		WithHTTPStatus(http.StatusOK).
+		WithTemplateName("response.tmpl").
+		WithTemplateContent(content).
 		Build()
 }

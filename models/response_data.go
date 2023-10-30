@@ -1,11 +1,11 @@
 package models
 
 type ResponseData struct {
-	HTTPStatus   int
-	HTTPMethod   string
-	TemplateName string
-	Content      string
-	Endpoint     string
+	HTTPStatus         int
+	TemplateName       string
+	TemplateContent    string
+	TemplateFormAction string
+	TemplateFormMethod string
 }
 
 type ResponseDataBuilder struct {
@@ -21,23 +21,23 @@ func (rb *ResponseDataBuilder) WithHTTPStatus(httStatus int) *ResponseDataBuilde
 	return rb
 }
 
-func (rb *ResponseDataBuilder) WithHTTPMethod(httMethod string) *ResponseDataBuilder {
-	rb.responseData.HTTPMethod = httMethod
-	return rb
-}
-
 func (rb *ResponseDataBuilder) WithTemplateName(templateName string) *ResponseDataBuilder {
 	rb.responseData.TemplateName = templateName
 	return rb
 }
 
-func (rb *ResponseDataBuilder) WithContent(content string) *ResponseDataBuilder {
-	rb.responseData.Content = content
+func (rb *ResponseDataBuilder) WithTemplateContent(templateContent string) *ResponseDataBuilder {
+	rb.responseData.TemplateContent = templateContent
 	return rb
 }
 
-func (rb *ResponseDataBuilder) WithEndpoint(endpoint string) *ResponseDataBuilder {
-	rb.responseData.Endpoint = endpoint
+func (rb *ResponseDataBuilder) WithTemplateFormAction(templateFormAction string) *ResponseDataBuilder {
+	rb.responseData.TemplateFormAction = templateFormAction
+	return rb
+}
+
+func (rb *ResponseDataBuilder) WithTemplateFormMethod(templateFormMethod string) *ResponseDataBuilder {
+	rb.responseData.TemplateFormMethod = templateFormMethod
 	return rb
 }
 

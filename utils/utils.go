@@ -15,6 +15,6 @@ func BuildInvalidResponseData() models.ResponseData {
 	return models.NewResponseDataBuilder().
 		WithHTTPStatus(http.StatusNotFound).
 		WithTemplateName("page-not-found.tmpl").
-		WithContent(constants.PAGE_NOT_FOUND).
+		WithTemplateContent(constants.PAGE_NOT_FOUND_MESSAGE).
 		Build()
 }

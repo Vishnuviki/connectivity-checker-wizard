@@ -2,7 +2,6 @@ package rules
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"conectivity-checker-wizard/constants"
@@ -24,11 +23,10 @@ func (r *DNSLookUPRule) SetName(ruleName string) {
 }
 
 func (r *DNSLookUPRule) Execute(inputData models.InputData) models.ResponseData {
-	log.Printf("Executing Rule: %s", constants.DNS_LOOK_UP_RULE)
 	content := fmt.Sprintf("This is a %s Page", constants.DNS_LOOK_UP_RULE)
 	return models.NewResponseDataBuilder().
 		WithHTTPStatus(http.StatusOK).
 		WithTemplateName("response.tmpl").
-		WithContent(content).
+		WithTemplateContent(content).
 		Build()
 }

@@ -1,29 +1,9 @@
 .body {
-    background: linear-gradient(
-      90deg,
-      rgb(231, 56, 12, 1) 0%,
-      rgb(161, 9, 141, 1) 55%,
-      rgb(29, 45, 218, 1) 100%
-    );
-  }
-
-a,
-h4,
-h3,
-h2,
-h1 {
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  background: linear-gradient( 90deg, rgb(231, 56, 12, 1) 0%, rgb(161, 9, 141, 1) 55%, rgb(29, 45, 218, 1) 100% );
 }
-
-/* .form-control {
-    color: rgb(0, 0, 0, 0.87);
-    border-bottom-color: rgb(0, 0, 0, 0.42);
-    box-shadow: none !important;
-    border: none;
-    border-bottom: 1px solid;
-    border-radius: 4px 4px 0 0;
-} */
-
+a, h4, h3, h2, h1 {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
 .full-width-text {
   width: 100%;
   text-align: center;
