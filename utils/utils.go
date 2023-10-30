@@ -12,9 +12,9 @@ import (
 */
 
 func BuildInvalidResponseData() models.ResponseData {
-	return models.NewResponseDataBuilder().
-		WithHTTPStatus(http.StatusNotFound).
-		WithTemplateName("page-not-found.tmpl").
-		WithTemplateContent(constants.PAGE_NOT_FOUND_MESSAGE).
-		Build()
+	return models.ResponseData{
+		HTTPStatus:      http.StatusNotFound,
+		TemplateName:    "page-not-found.tmpl",
+		TemplateContent: constants.PAGE_NOT_FOUND_MESSAGE,
+	}
 }

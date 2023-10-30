@@ -26,9 +26,9 @@ func (r *DispatchIPRule) SetName(ruleName string) {
 func (r *DispatchIPRule) Execute(inputData models.InputData) models.ResponseData {
 	log.Printf("Executing Rule: %s", r.name)
 	content := fmt.Sprintf("This is a %s Page", constants.DISPATCH_IP_RULE)
-	return models.NewResponseDataBuilder().
-		WithHTTPStatus(http.StatusOK).
-		WithTemplateName("response.tmpl").
-		WithTemplateContent(content).
-		Build()
+	return models.ResponseData{
+		HTTPStatus:      http.StatusOK,
+		TemplateName:    "response.tmpl",
+		TemplateContent: content,
+	}
 }
