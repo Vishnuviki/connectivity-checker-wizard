@@ -41,14 +41,17 @@ func (mc *MainController) HandleValidationRequest(c *gin.Context) {
 		session.AddFlash("Validation failed: " + err.Error())
 		session.Save()
 		c.Redirect(http.StatusFound, "/")
+		return
 	} else if !inputData.IsDestinationAddressValid() {
 		session.AddFlash(constants.INVALID_DESTINATION_ADDRESS_MESSAGE)
 		session.Save()
 		c.Redirect(http.StatusFound, "/")
+		return
 	} else if !IsValidPortNumber(inputData.DestinationPort) {
 		session.AddFlash(constants.INVALID_PORT_NUMBER_MESSAGE)
 		session.Save()
 		c.Redirect(http.StatusFound, "/")
+		return
 	} else {
 		session.Set("inputData", inputData)
 		session.Save()
