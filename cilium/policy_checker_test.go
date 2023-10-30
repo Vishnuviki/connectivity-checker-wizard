@@ -4,10 +4,10 @@ import "testing"
 
 func TestFQDNNameMatch(t *testing.T) {
 	testCases := []struct {
-		fqdnName string
+		fqdnName    string
 		fqdnToMatch string
 		shouldMatch bool
-	} {
+	}{
 		{fqdnName: "host.domain.com", fqdnToMatch: "host.domain.com", shouldMatch: true},
 		{fqdnName: "host.domain.com", fqdnToMatch: "another.domain.com", shouldMatch: false},
 	}
@@ -66,6 +66,9 @@ func TestFQDNPatternMatch(t *testing.T) {
 		{fqdnPattern: "*.cilium.io", fqdnToMatch: "cilium.io", shouldMatch: false},
 		{fqdnPattern: "*.cilium.io", fqdnToMatch: "abc.def.cilium.io", shouldMatch: false},
 
+		{fqdnPattern: "abc.*.cilium.io", fqdnToMatch: "abc.def.cilium.io", shouldMatch: true},
+		{fqdnPattern: "abc.def.cilium.io", fqdnToMatch: "abc.ghi.cilium.io", shouldMatch: false},
+
 		{fqdnPattern: "*cilium.io", fqdnToMatch: "cilium.io", shouldMatch: true},
 		{fqdnPattern: "*cilium.io", fqdnToMatch: "subcilium.io", shouldMatch: true},
 		{fqdnPattern: "*cilium.io", fqdnToMatch: "www.cilium.io", shouldMatch: false},
@@ -75,6 +78,11 @@ func TestFQDNPatternMatch(t *testing.T) {
 		{fqdnPattern: "sub*.cilium.io", fqdnToMatch: "subdomain.cilium.io", shouldMatch: true},
 		{fqdnPattern: "sub*.cilium.io", fqdnToMatch: "blog.cilium.io", shouldMatch: false},
 		{fqdnPattern: "sub*.cilium.io", fqdnToMatch: "www.cilium.io", shouldMatch: false},
+
+		{fqdnPattern: "www.cilium.io", fqdnToMatch: "www.cilium.io", shouldMatch: true},
+		{fqdnPattern: "www.cilium.io", fqdnToMatch: "zzz.cilium.io", shouldMatch: false},
+
+		{fqdnPattern: "no-dots", fqdnToMatch: "no-dots", shouldMatch: false},
 	}
 
 	for _, tc := range testCases {
@@ -98,10 +106,10 @@ func TestFQDNPatternMatch(t *testing.T) {
 
 func TestCIDRMatch(t *testing.T) {
 	testCases := []struct {
-		cidr string
-		ipToMatch string
+		cidr        string
+		ipToMatch   string
 		shouldMatch bool
-	} {
+	}{
 		{cidr: "10.0.0.0/8", ipToMatch: "10.0.0.10", shouldMatch: true},
 		{cidr: "10.0.0.0/8", ipToMatch: "192.168.0.10", shouldMatch: false},
 	}

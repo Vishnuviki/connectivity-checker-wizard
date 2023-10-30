@@ -52,6 +52,7 @@ func (c *InClusterCiliumPolicyChecker) CheckIPAllowedByPolicyInNamespace(ip stri
 			for _, cidr := range egressRule.ToCIDR {
 				_, ipNet, err := net.ParseCIDR(string(cidr))
 				if err != nil {
+					// this should never happen, unless cilium allows invalid CIDRs?
 					return false, err
 				}
 				if ipNet.Contains(net.ParseIP(ip)) {
