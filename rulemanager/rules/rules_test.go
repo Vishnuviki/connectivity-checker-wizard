@@ -14,7 +14,7 @@ import (
 
 func TestAllRules(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Test ValidationRule Suite")
+	RunSpecs(t, "Test Rules Suite")
 }
 
 var _ = Describe("Testing Rules", func() {
