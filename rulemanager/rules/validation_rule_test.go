@@ -46,6 +46,15 @@ var _ = Describe("Testing ValidationRule functions", func() {
 			Expect(responseData.TemplateContent).To(Equal(buildErrorResponseContent()))
 		})
 	})
+
+	It("Should return a ResponseData with a message related to destinationAddress", func() {
+		responseData := buildResponse(inputData.DestinationAddress)
+		Expect(responseData.HTTPStatus).To(Equal(200))
+		Expect(responseData.TemplateName).To(Equal("question.tmpl"))
+		Expect(responseData.TemplateContent).To(Equal(buildResponseContent()))
+		Expect(responseData.TemplateFormMethod).To(Equal("POST"))
+		Expect(responseData.TemplateFormAction).To(Equal("/rule/networkPolicyRule"))
+	})
 })
 
 func buildValidationRule() i.Rule {
