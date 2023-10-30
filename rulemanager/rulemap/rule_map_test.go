@@ -15,7 +15,7 @@ func TestRuleMap(t *testing.T) {
 	RunSpecs(t, "Test Rule Map Suite")
 }
 
-var _ = Describe("Testing query escalation required functions", func() {
+var _ = Describe("Testing Rule Map functions", func() {
 	var (
 		ruleMap *RuleMap
 	)
@@ -30,7 +30,7 @@ var _ = Describe("Testing query escalation required functions", func() {
 		Expect(ruleMap).To(Equal(instance))
 	})
 
-	Context("GetRuleByName", func() {
+	Context("Test GetRuleByName method", func() {
 		It("Should return a existent rule", func() {
 			rule, _ := ruleMap.GetRuleByName("validationRule")
 			Expect(rule).NotTo(BeNil())
