@@ -3,7 +3,7 @@ package cilium
 import (
 	"context"
 	"log"
-	"regexp"
+	"net"
 	"strings"
 
 	v2 "github.com/cilium/cilium/pkg/k8s/apis/cilium.io/v2"
@@ -45,15 +45,16 @@ func (c *InClusterCiliumPolicyChecker) CheckIPAllowedByPolicyInNamespace(ip stri
 		return false, err
 	}
 
-	ipRegex := regexp.MustCompile(ip)
 	for _, policy := range policies.Items {
 		// Check each egressRule in the policy
 		for _, egressRule := range policy.Spec.Egress {
 			// Check each CIDR in the egressRule
 			for _, cidr := range egressRule.ToCIDR {
-				val := string(cidr)
-				log.Println("IP Address:", val)
-				if ipRegex.MatchString(val) {
+				_, ipNet, err := net.ParseCIDR(string(cidr))
+				if err != nil {
+					return false, err
+				}
+				if ipNet.Contains(net.ParseIP(ip)) {
 					return true, nil
 				}
 			}
@@ -141,7 +142,7 @@ func isPatternMatch(fqdn string, matchPattern string) bool {
 
 		// not the first token
 		if i > 0 {
-			// TODO: do we allow "*sub" or "sub*" matches here?
+			// TODO: do we allow "*sub" or "sub*" matches for tokens other than the first?
 			if patternToken == "*" {
 				continue
 			}
@@ -155,10 +156,9 @@ func isPatternMatch(fqdn string, matchPattern string) bool {
 			if patternToken == "*" {
 				return true
 			}
-			// "*sub" case, match *subdomain and subdomain
+			// "*sub" case
 			if strings.HasPrefix(patternToken, "*") {
-				return strings.HasSuffix(fqdnToken, patternToken[1:]) ||
-					fqdnToken == patternToken[1:]
+				return strings.HasSuffix(fqdnToken, patternToken[1:])
 			}
 			//sub* case
 			if strings.HasSuffix(patternToken, "*") {

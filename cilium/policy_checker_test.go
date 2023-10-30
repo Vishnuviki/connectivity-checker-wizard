@@ -95,3 +95,32 @@ func TestFQDNPatternMatch(t *testing.T) {
 		}
 	}
 }
+
+func TestCIDRMatch(t *testing.T) {
+	testCases := []struct {
+		cidr string
+		ipToMatch string
+		shouldMatch bool
+	} {
+		{cidr: "10.0.0.0/8", ipToMatch: "10.0.0.10", shouldMatch: true},
+		{cidr: "10.0.0.0/8", ipToMatch: "192.168.0.10", shouldMatch: false},
+	}
+
+	for _, tc := range testCases {
+		stub := &StubbedCiliumNetworkPolicyGetter{
+			cidrs: []string{tc.cidr},
+		}
+		pc := NewInClusterCiliumPolicyChecker(stub)
+
+		match, err := pc.CheckIPAllowedByPolicyInNamespace(tc.ipToMatch, "namespace")
+		if err != nil {
+			t.Errorf("Error checking IP %s, cidr range: %s, error: %s", tc.ipToMatch, tc.cidr, err.Error())
+		}
+		if tc.shouldMatch && !match {
+			t.Errorf("IP %s should match cidr range %s, but it did not", tc.ipToMatch, tc.cidr)
+		}
+		if !tc.shouldMatch && match {
+			t.Errorf("IP %s should not match cidr range %s, but it did", tc.ipToMatch, tc.cidr)
+		}
+	}
+}
