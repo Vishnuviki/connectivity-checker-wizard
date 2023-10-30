@@ -11,7 +11,6 @@ import (
 	cilium_v2 "github.com/cilium/cilium/pkg/k8s/client/clientset/versioned/typed/cilium.io/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	rest "k8s.io/client-go/rest"
-	gonet "github.com/THREATINT/go-net"
 )
 
 type PolicyChecker interface {
@@ -74,7 +73,7 @@ func (c *InClusterCiliumPolicyChecker) CheckFQDNAllowedByPolicyInNamespace(fqdn 
 		for _, egressRule := range policy.Spec.Egress {
 			// Check each FQDN in the egressRule
 			for _, fqdnSelector := range egressRule.ToFQDNs {
-				if strings.EqualFold(fqdnSelector.MatchName, fqdn) {
+				if isNameMatch(fqdn, fqdnSelector.MatchName) {
 					return true, nil
 				}
 				if isPatternMatch(fqdn, fqdnSelector.MatchPattern) {
@@ -86,6 +85,12 @@ func (c *InClusterCiliumPolicyChecker) CheckFQDNAllowedByPolicyInNamespace(fqdn 
 	return false, nil
 }
 
+func isNameMatch(fqdn string, matchName string) bool {
+	return strings.EqualFold(fqdn, matchName)
+}
+
+// Robbed from: https://github.com/cilium/cilium/blob/5a0b88d1e0e4609c6f192a1b6aeadb46e2f48211/pkg/policy/api/fqdn.go#L62
+//
 // MatchPattern allows using wildcards to match DNS names. All wildcards are
 // case insensitive. The wildcards are:
 // - "*" matches 0 or more DNS valid characters, and may occur anywhere in
@@ -95,25 +100,77 @@ func (c *InClusterCiliumPolicyChecker) CheckFQDNAllowedByPolicyInNamespace(fqdn 
 //
 // Examples:
 // `*.cilium.io` matches subomains of cilium at that level
-//   www.cilium.io and blog.cilium.io match, cilium.io and google.com do not
+//
+//	www.cilium.io and blog.cilium.io match, cilium.io and google.com do not
+//
 // `*cilium.io` matches cilium.io and all subdomains ends with "cilium.io"
-//   except those containing "." separator, subcilium.io and sub-cilium.io match,
-//   www.cilium.io and blog.cilium.io does not
+//
+//	except those containing "." separator, subcilium.io and sub-cilium.io match,
+//	www.cilium.io and blog.cilium.io does not
+//
 // sub*.cilium.io matches subdomains of cilium where the subdomain component
 // begins with "sub"
-//   sub.cilium.io and subdomain.cilium.io match, www.cilium.io,
-//   blog.cilium.io, cilium.io and google.com do not
 //
+//	sub.cilium.io and subdomain.cilium.io match, www.cilium.io,
+//	blog.cilium.io, cilium.io and google.com do not
 func isPatternMatch(fqdn string, matchPattern string) bool {
 	if matchPattern == "" {
 		return false
 	}
 
-	if gonet.DomainFromFqdn(fqdn) == gonet.DomainFromFqdn(matchPattern) {
-		return true
+	patternTokens := strings.Split(matchPattern, ".")
+	fqdnTokens := strings.Split(fqdn, ".")
+
+	// TODO: do we allow "*" name pattern? Feels like this should not be allowed,
+	// TODO: otherwise, what is the point if you can just say "*" and everything matches?
+	// TODO: double check!
+
+	// no "." in pattern or fqdn
+	if len(patternTokens) == 1 || len(fqdnTokens) == 1 {
+		return false
 	}
 
-	return false
+	if len(patternTokens) != len(fqdnTokens) {
+		return false
+	}
+
+	// iterating from the end
+	for i := len(patternTokens) - 1; i >= 0; i-- {
+		patternToken := patternTokens[i]
+		fqdnToken := fqdnTokens[i]
+
+		// not the first token
+		if i > 0 {
+			// TODO: do we allow "*sub" or "sub*" matches here?
+			if patternToken == "*" {
+				continue
+			}
+			if patternToken != fqdnToken {
+				return false
+			}
+		}
+
+		// first token
+		if i == 0 {
+			if patternToken == "*" {
+				return true
+			}
+			// "*sub" case, match *subdomain and subdomain
+			if strings.HasPrefix(patternToken, "*") {
+				return strings.HasSuffix(fqdnToken, patternToken[1:]) ||
+					fqdnToken == patternToken[1:]
+			}
+			//sub* case
+			if strings.HasSuffix(patternToken, "*") {
+				return strings.HasPrefix(fqdnToken, patternToken[:len(patternToken)-1])
+			}
+			if patternToken != fqdnToken {
+				return false
+			}
+		}
+	}
+
+	return true
 }
 
 func (c *InClusterCiliumPolicyChecker) getCiliumNetworkPolicies(namespace string) (*v2.CiliumNetworkPolicyList, error) {

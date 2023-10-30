@@ -3,37 +3,95 @@ package cilium
 import "testing"
 
 func TestFQDNNameMatch(t *testing.T) {
-	stub := &StubbedCiliumNetworkPolicyGetter{
-		fqdnNames: []string{"host.domain.com"},
+	testCases := []struct {
+		fqdnName string
+		fqdnToMatch string
+		shouldMatch bool
+	} {
+		{fqdnName: "host.domain.com", fqdnToMatch: "host.domain.com", shouldMatch: true},
+		{fqdnName: "host.domain.com", fqdnToMatch: "another.domain.com", shouldMatch: false},
 	}
 
-	pc := NewInClusterCiliumPolicyChecker(stub)
+	for _, tc := range testCases {
+		stub := &StubbedCiliumNetworkPolicyGetter{
+			fqdnNames: []string{tc.fqdnName},
+		}
+		pc := NewInClusterCiliumPolicyChecker(stub)
 
-	allowed, _ := pc.CheckFQDNAllowedByPolicyInNamespace("host.domain.com", "namespace")
-	if !allowed {
-		t.Error("FQDN should be allowed")
-	}
-
-	allowed, _ = pc.CheckFQDNAllowedByPolicyInNamespace("not-allowed.domain.com", "namespace")
-	if allowed {
-		t.Error("FQDN should not be allowed")
+		match, err := pc.CheckFQDNAllowedByPolicyInNamespace(tc.fqdnToMatch, "namespace")
+		if err != nil {
+			t.Errorf("Error checking FQDN %s, name: %s, error: %s", tc.fqdnToMatch, tc.fqdnName, err.Error())
+		}
+		if tc.shouldMatch && !match {
+			t.Errorf("FQDN %s should match name %s, but it did not", tc.fqdnToMatch, tc.fqdnName)
+		}
+		if !tc.shouldMatch && match {
+			t.Errorf("FQDN %s should not match name %s, but it did", tc.fqdnToMatch, tc.fqdnName)
+		}
 	}
 }
 
+// Robbed from: https://github.com/cilium/cilium/blob/5a0b88d1e0e4609c6f192a1b6aeadb46e2f48211/pkg/policy/api/fqdn.go#L62
+//
+// MatchPattern allows using wildcards to match DNS names. All wildcards are
+// case insensitive. The wildcards are:
+// - "*" matches 0 or more DNS valid characters, and may occur anywhere in
+// the pattern. As a special case a "*" as the leftmost character, without a
+// following "." matches all subdomains as well as the name to the right.
+// A trailing "." is automatically added when missing.
+//
+// Examples:
+// `*.cilium.io` matches subomains of cilium at that level
+//
+//	www.cilium.io and blog.cilium.io match, cilium.io and google.com do not
+//
+// `*cilium.io` matches cilium.io and all subdomains ends with "cilium.io"
+//
+//	except those containing "." separator, subcilium.io and sub-cilium.io match,
+//	www.cilium.io and blog.cilium.io does not
+//
+// sub*.cilium.io matches subdomains of cilium where the subdomain component
+// begins with "sub"
+//
+//	sub.cilium.io and subdomain.cilium.io match, www.cilium.io,
+//	blog.cilium.io, cilium.io and google.com do not
 func TestFQDNPatternMatch(t *testing.T) {
-	stub := &StubbedCiliumNetworkPolicyGetter{
-		fqdnPatterns: []string{"*.domain.com"},
+	testCases := []struct {
+		fqdnPattern string
+		fqdnToMatch string
+		shouldMatch bool
+	}{
+		{fqdnPattern: "*.cilium.io", fqdnToMatch: "www.cilium.io", shouldMatch: true},
+		{fqdnPattern: "*.cilium.io", fqdnToMatch: "blog.cilium.io", shouldMatch: true},
+		{fqdnPattern: "*.cilium.io", fqdnToMatch: "cilium.io", shouldMatch: false},
+		{fqdnPattern: "*.cilium.io", fqdnToMatch: "abc.def.cilium.io", shouldMatch: false},
+
+		{fqdnPattern: "*cilium.io", fqdnToMatch: "cilium.io", shouldMatch: true},
+		{fqdnPattern: "*cilium.io", fqdnToMatch: "subcilium.io", shouldMatch: true},
+		{fqdnPattern: "*cilium.io", fqdnToMatch: "www.cilium.io", shouldMatch: false},
+		{fqdnPattern: "*cilium.io", fqdnToMatch: "blog.cilium.io", shouldMatch: false},
+
+		{fqdnPattern: "sub*.cilium.io", fqdnToMatch: "sub.cilium.io", shouldMatch: true},
+		{fqdnPattern: "sub*.cilium.io", fqdnToMatch: "subdomain.cilium.io", shouldMatch: true},
+		{fqdnPattern: "sub*.cilium.io", fqdnToMatch: "blog.cilium.io", shouldMatch: false},
+		{fqdnPattern: "sub*.cilium.io", fqdnToMatch: "www.cilium.io", shouldMatch: false},
 	}
 
-	pc := NewInClusterCiliumPolicyChecker(stub)
+	for _, tc := range testCases {
+		stub := &StubbedCiliumNetworkPolicyGetter{
+			fqdnPatterns: []string{tc.fqdnPattern},
+		}
+		pc := NewInClusterCiliumPolicyChecker(stub)
 
-	allowed, _ := pc.CheckFQDNAllowedByPolicyInNamespace("host.domain.com", "namespace")
-	if !allowed {
-		t.Error("FQDN should be allowed")
-	}
-
-	allowed, _ = pc.CheckFQDNAllowedByPolicyInNamespace("host.potato.com", "namespace")
-	if allowed {
-		t.Error("FQDN should not be allowed")
+		match, err := pc.CheckFQDNAllowedByPolicyInNamespace(tc.fqdnToMatch, "namespace")
+		if err != nil {
+			t.Errorf("Error checking FQDN %s, pattern: %s, error: %s", tc.fqdnToMatch, tc.fqdnPattern, err.Error())
+		}
+		if tc.shouldMatch && !match {
+			t.Errorf("FQDN %s should match pattern %s, but it did not", tc.fqdnToMatch, tc.fqdnPattern)
+		}
+		if !tc.shouldMatch && match {
+			t.Errorf("FQDN %s should not match pattern %s, but it did", tc.fqdnToMatch, tc.fqdnPattern)
+		}
 	}
 }
