@@ -6,9 +6,13 @@ spec:
   description: Allow egress to googleapis and slack
   egress:
   - toFQDNs:
+    - matchPattern: '*.*.googleapis.com'
     - matchPattern: '*.googleapis.com'
     - matchPattern: '*.slack.com'
     - matchPattern: slack.com
     - matchPattern: '*'
     - matchPattern: 'sky.potato.com'
+  - toCIDR:
+    - 192.168.0.0/16
+    - 10.0.0.0/8
   endpointSelector: {}

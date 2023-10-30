@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 
-	c "conectivity-checker-wizard/constants"
 	"conectivity-checker-wizard/models"
 	i "conectivity-checker-wizard/rulemanager/interfaces"
 )
@@ -24,7 +23,7 @@ func (r *ValidationRule) SetName(ruleName string) {
 }
 
 func (r *ValidationRule) Execute(inputData models.InputData) models.ResponseData {
-	log.Printf("Executing Rule: %s", c.VALIDATION_RULE)
+	log.Printf("Executing Rule: %s", r.name)
 	if inputData.IsDestinationAddressIP() {
 		return buildResponse(inputData.DestinationAddress)
 	} else {
@@ -40,9 +39,9 @@ func buildResponse(destinationAddress string) models.ResponseData {
 		"destination is configured as a raw IP, then you can continue!!", destinationAddress)
 	return models.NewResponseDataBuilder().
 		WithHTTPStatus(http.StatusOK).
-		WithHTTPMethod("post").
 		WithTemplateName("question.tmpl").
-		WithEndpoint("/rule/networkPolicyRule").
-		WithContent(content).
+		WithTemplateContent(content).
+		WithTemplateFormMethod(http.MethodPost).
+		WithTemplateFormAction("/rule/networkPolicyRule").
 		Build()
 }

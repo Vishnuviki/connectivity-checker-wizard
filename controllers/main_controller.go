@@ -4,11 +4,11 @@ import (
 	"encoding/gob"
 	"log"
 	"net/http"
+	"strconv"
 
 	"conectivity-checker-wizard/constants"
 	"conectivity-checker-wizard/models"
 	"conectivity-checker-wizard/rulemanager/handler"
-	"conectivity-checker-wizard/services/cilium"
 	"conectivity-checker-wizard/utils"
 
 	"github.com/gin-contrib/sessions"
@@ -24,35 +24,37 @@ type MainController struct{}
 func (mc *MainController) Home(c *gin.Context) {
 	session := sessions.Default(c)
 	flashes := session.Flashes()
-	inputData := session.Get("inputData")
+	// TODO: I think its better dont display the values, when the User clicks on the Home button
+	// then the form should be clean, so for that reason we don't show the input values??
+	// inputData := session.Get("inputData")
 	session.Save()
-
 	c.HTML(http.StatusOK, "home.tmpl", gin.H{
-		"flashes":   flashes,
-		"inputData": inputData,
+		"flashes": flashes,
+		// "inputData": inputData,
 	})
 }
 
 func (mc *MainController) HandleValidationRequest(c *gin.Context) {
-	var data models.InputData
+	var inputData models.InputData
 	session := sessions.Default(c)
-	err := c.ShouldBind(&data)
-	session.Set("inputData", data)
-	session.Save()
-
-	if err != nil {
+	if err := c.ShouldBind(&inputData); err != nil {
 		session.AddFlash("Validation failed: " + err.Error())
 		session.Save()
 		c.Redirect(http.StatusFound, "/")
 		return
-	} else if !data.IsDestinationAddressValid() {
-		// TODO: what happen if user types `slack.com`??
-		// We need to change the logic of checking FQDN
-		session.AddFlash("Validation failed: Destination address not valid, must be IP or FQDN")
+	} else if !inputData.IsDestinationAddressValid() {
+		session.AddFlash(constants.INVALID_DESTINATION_ADDRESS_MESSAGE)
+		session.Save()
+		c.Redirect(http.StatusFound, "/")
+		return
+	} else if !IsValidPortNumber(inputData.DestinationPort) {
+		session.AddFlash(constants.INVALID_PORT_NUMBER_MESSAGE)
 		session.Save()
 		c.Redirect(http.StatusFound, "/")
 		return
 	} else {
+		session.Set("inputData", inputData)
+		session.Save()
 		responseData := handler.HandleRules(c, constants.VALIDATION_RULE)
 		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	}
@@ -74,10 +76,18 @@ func (mc *MainController) Error(c *gin.Context) {
 	c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 }
 
-func (mc *MainController) CiliumPolicies(c *gin.Context) {
-	policies, err := cilium.GetCiliumNetworkPolicies("default")
+func IsValidPortNumber(portStr string) bool {
+	port, err := strconv.Atoi(portStr)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		return false
 	}
-	c.JSON(http.StatusOK, policies)
+	return port >= 1 && port <= 65535
 }
+
+// func (mc *MainController) CiliumPolicies(c *gin.Context) {
+// 	policies, err := cilium.GetCiliumNetworkPolicies("default")
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, err.Error())
+// 	}
+// 	c.JSON(http.StatusOK, policies)
+// }

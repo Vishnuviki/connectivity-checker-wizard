@@ -7,7 +7,6 @@ import (
 	i "conectivity-checker-wizard/rulemanager/interfaces"
 	"conectivity-checker-wizard/rulemanager/rulemap"
 	"conectivity-checker-wizard/rulemanager/rules"
-	"conectivity-checker-wizard/services/cilium"
 )
 
 // This function build the rules based on the dependency order
@@ -44,8 +43,7 @@ func buildDNSLookUPRule(ruleMap *rulemap.RuleMap) {
 }
 
 func buildNetworkPolicyRule(ruleMap *rulemap.RuleMap) {
-	cpc := cilium.InClusterCiliumPolicyChecker{}
-	rule := rules.NewNetworkPolicyRule(c.NETWORK_POLICY_RULE, nil, cpc)
+	rule := new(rules.NetworkPolicyRule)
 	rule.SetName(c.NETWORK_POLICY_RULE)
 	rule.SetNextRule(nil)
 	ruleMap.AddRule(c.NETWORK_POLICY_RULE, rule)

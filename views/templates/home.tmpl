@@ -1,74 +1,67 @@
 {{ template "header.tmpl" .}}
 <div class="row">
-  <div class="col-md-10 mx-auto rounded bg-white">
-    <div class="row">
-      <div class="col-md-5">
-        <div class="d-flex align-items-center justify-content-center">
-          <img
-            src="/views/static/logos/network.svg"
-            alt="network-connectivity"
-            class="img-fluid p-5"
-          />
-        </div>
+   <div class="col-md-10 mx-auto rounded bg-white">
+      <div class="row">
+         <div class="col-md-5">
+            <div class="d-flex align-items-center justify-content-center">
+               <img
+                  src="/views/static/logos/network.svg"
+                  alt="network-connectivity"
+                  class="img-fluid p-5"
+                  />
+            </div>
+         </div>
+         <div class="col-md-7">
+            <div class="m-5 text-center">
+               <h1>Welcome!</h1>
+            </div>
+            <div class="form-group mb-4">
+               {{range .flashes}}
+               <span>{{.}}</span>
+               {{end}}
+            </div>
+            <form class="m-5" action="/validate" method="post">
+               <div class="form-group mb-4">
+                  <input
+                     type="text"
+                     class="form-control"
+                     id="sourceNamespace"
+                     name="sourceNamespace"
+                     placeholder="Source Namespace"
+                     value="{{with .inputData}}{{.SourceNamespace}}{{end}}"
+                     required
+                     />
+               </div>
+               <div class="form-group mb-4">
+                  <input
+                     type="text"
+                     class="form-control"
+                     id="destinationPort"
+                     name="destinationPort"
+                     placeholder="Destination Port"
+                     value="{{with .inputData}}{{.DestinationPort}}{{end}}"
+                     required
+                     />
+               </div>
+               <div class="form-group mb-4">
+                  <input
+                     type="text"
+                     class="form-control"
+                     id="destinationAddress"
+                     name="destinationAddress"
+                     placeholder="Destination Address"
+                     value="{{with .inputData}}{{.DestinationAddress}}{{end}}"
+                     required
+                     />
+               </div>
+               <div class="d-grid col-6 mx-auto pt-4">
+                  <button class="btn btn-outline-primary" type="submit">
+                  Submit
+                  </button>
+               </div>
+            </form>
+         </div>
       </div>
-
-      <div class="col-md-7">
-        <div class="m-5 text-center">
-          <h1>Welcome!</h1>
-        </div>
-
-
-        <div class="form-group mb-4">
-          {{range .flashes}}
-            <span>{{.}}</span>
-          {{end}}
-        </div>
-
-        <form class="m-5" action="/validate" method="post">
-          <div class="form-group mb-4">
-            <input
-              type="text"
-              class="form-control"
-              id="sourceNamespace"
-              name="sourceNamespace"
-              placeholder="Source Namespace"
-              value="{{with .inputData}}{{.SourceNamespace}}{{end}}"
-              required
-            />
-          </div>
-
-          <div class="form-group mb-4">
-            <input
-              type="text"
-              class="form-control"
-              id="destinationPort"
-              name="destinationPort"
-              placeholder="Destination Port"
-              value="{{with .inputData}}{{.DestinationPort}}{{end}}"
-              required
-            />
-          </div>
-
-          <div class="form-group mb-4">
-            <input
-              type="text"
-              class="form-control"
-              id="destinationAddress"
-              name="destinationAddress"
-              placeholder="Destination Address"
-              value="{{with .inputData}}{{.DestinationAddress}}{{end}}"
-              required
-            />
-          </div>
-
-          <div class="d-grid col-6 mx-auto pt-4">
-            <button class="btn btn-outline-primary" type="submit">
-              Submit
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+   </div>
 </div>
 {{ template "footer.tmpl" .}}
