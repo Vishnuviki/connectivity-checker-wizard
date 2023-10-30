@@ -3,6 +3,7 @@ package builder
 import (
 	"log"
 
+	"conectivity-checker-wizard/cilium"
 	c "conectivity-checker-wizard/constants"
 	i "conectivity-checker-wizard/rulemanager/interfaces"
 	"conectivity-checker-wizard/rulemanager/rulemap"
@@ -43,9 +44,12 @@ func buildDNSLookUPRule(ruleMap *rulemap.RuleMap) {
 }
 
 func buildNetworkPolicyRule(ruleMap *rulemap.RuleMap) {
+	// TODO: cilium policy checker should be injected rather than aquired directly
+	policyChecker := cilium.NewInClusterCiliumPolicyChecker()
 	rule := new(rules.NetworkPolicyRule)
 	rule.SetName(c.NETWORK_POLICY_RULE)
 	rule.SetNextRule(nil)
+	rule.SetPolicyChecker(policyChecker)
 	ruleMap.AddRule(c.NETWORK_POLICY_RULE, rule)
 }
 

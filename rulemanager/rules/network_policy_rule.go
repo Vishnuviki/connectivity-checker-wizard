@@ -5,14 +5,14 @@ import (
 	"log"
 	"net/http"
 
+	"conectivity-checker-wizard/cilium"
 	"conectivity-checker-wizard/models"
 	i "conectivity-checker-wizard/rulemanager/interfaces"
-	"conectivity-checker-wizard/cilium"
 )
 
 type NetworkPolicyRule struct {
-	name     string
-	nextRule i.Rule
+	name          string
+	nextRule      i.Rule
 	policyChecker cilium.PolicyChecker
 }
 
@@ -22,6 +22,10 @@ func (r *NetworkPolicyRule) SetName(ruleName string) {
 
 func (r *NetworkPolicyRule) SetNextRule(nextRule i.Rule) {
 	r.nextRule = nextRule
+}
+
+func (r *NetworkPolicyRule) SetPolicyChecker(policyChecker cilium.PolicyChecker) {
+	r.policyChecker = policyChecker
 }
 
 func (r *NetworkPolicyRule) Execute(inputData models.InputData) models.ResponseData {
