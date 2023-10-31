@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"conectivity-checker-wizard/cilium"
 	"conectivity-checker-wizard/constants"
 	"conectivity-checker-wizard/models"
 	"conectivity-checker-wizard/rulemanager/handler"
@@ -19,7 +20,21 @@ func init() {
 	gob.Register(models.InputData{})
 }
 
-type MainController struct{}
+type MainController struct {
+	policyChecker cilium.PolicyChecker
+}
+
+func NewMainController(policyChecker cilium.PolicyChecker) *MainController {
+
+	// TODO: rule map thingy should hang off the main controller
+	// TODO: add a field to the main controller struct and pass it in as a parameter
+	// TODO: rule map thingy should take policy checker as a paramter
+	// handler.BuildRuleMap()
+
+	return &MainController{
+		policyChecker: policyChecker,
+	}
+}
 
 func (mc *MainController) Home(c *gin.Context) {
 	session := sessions.Default(c)
@@ -83,11 +98,3 @@ func IsValidPortNumber(portStr string) bool {
 	}
 	return port >= 1 && port <= 65535
 }
-
-// func (mc *MainController) CiliumPolicies(c *gin.Context) {
-// 	policies, err := cilium.GetCiliumNetworkPolicies("default")
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, err.Error())
-// 	}
-// 	c.JSON(http.StatusOK, policies)
-// }

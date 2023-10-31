@@ -1,8 +1,8 @@
 package main
 
 import (
+	"conectivity-checker-wizard/cilium"
 	"conectivity-checker-wizard/controllers"
-	"conectivity-checker-wizard/rulemanager/handler"
 	"os"
 
 	"github.com/gin-contrib/sessions"
@@ -20,9 +20,6 @@ func main() {
 	store := cookie.NewStore([]byte("secret"))
 	router.Use(sessions.Sessions("mysession", store))
 
-	// build rules and create RuleMap
-	handler.BuildRuleMap()
-
 	// load all the templates
 	router.LoadHTMLGlob("views/templates/*")
 
@@ -30,12 +27,24 @@ func main() {
 	router.Static("/views/static/", "./views/static/")
 
 	// configure routes
-	mainController := new(controllers.MainController)
+	mainController := getMainController()
+
 	router.GET("/", mainController.Home)
 	router.GET("/rule/*any", mainController.Error)
-	// router.GET("/cilium", mainController.CiliumPolicies)
 	router.POST("/validate", mainController.HandleValidationRequest)
 	router.POST("/rule/:ruleName", mainController.HandleRuleRequest)
 
 	router.Run(":8080")
+}
+
+func getMainController() *controllers.MainController {
+	// use stubbed policy checker
+	if os.Getenv("LOCAL_DEV") != "" {
+		stub := &cilium.StubbedCiliumNetworkPolicyGetter{}
+		stubPolicyChecker := cilium.NewInClusterCiliumPolicyChecker(stub)
+		return controllers.NewMainController(stubPolicyChecker)
+	}
+
+	policyChecker := cilium.NewInClusterCiliumPolicyChecker()
+	return controllers.NewMainController(policyChecker)
 }
