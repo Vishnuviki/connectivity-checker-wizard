@@ -61,6 +61,8 @@ func TestFQDNPatternMatch(t *testing.T) {
 		fqdnToMatch string
 		shouldMatch bool
 	}{
+		{fqdnPattern: "*", fqdnToMatch: "www.cilium.io", shouldMatch: true},
+
 		{fqdnPattern: "*.cilium.io", fqdnToMatch: "www.cilium.io", shouldMatch: true},
 		{fqdnPattern: "*.cilium.io", fqdnToMatch: "blog.cilium.io", shouldMatch: true},
 		{fqdnPattern: "*.cilium.io", fqdnToMatch: "cilium.io", shouldMatch: false},
@@ -93,13 +95,13 @@ func TestFQDNPatternMatch(t *testing.T) {
 
 		match, err := pc.CheckFQDNAllowedByPolicyInNamespace(tc.fqdnToMatch, "namespace")
 		if err != nil {
-			t.Errorf("Error checking FQDN %s, pattern: %s, error: %s", tc.fqdnToMatch, tc.fqdnPattern, err.Error())
+			t.Errorf("Error checking FQDN %s, pattern: \"%s\", error: %s", tc.fqdnToMatch, tc.fqdnPattern, err.Error())
 		}
 		if tc.shouldMatch && !match {
-			t.Errorf("FQDN %s should match pattern %s, but it did not", tc.fqdnToMatch, tc.fqdnPattern)
+			t.Errorf("FQDN %s should match pattern \"%s\", but it did not", tc.fqdnToMatch, tc.fqdnPattern)
 		}
 		if !tc.shouldMatch && match {
-			t.Errorf("FQDN %s should not match pattern %s, but it did", tc.fqdnToMatch, tc.fqdnPattern)
+			t.Errorf("FQDN %s should not match pattern \"%s\", but it did", tc.fqdnToMatch, tc.fqdnPattern)
 		}
 	}
 }

@@ -120,12 +120,13 @@ func isPatternMatch(fqdn string, matchPattern string) bool {
 		return false
 	}
 
+	// "*" pattern allows every name
+	if matchPattern == "*" {
+		return true
+	}
+
 	patternTokens := strings.Split(matchPattern, ".")
 	fqdnTokens := strings.Split(fqdn, ".")
-
-	// TODO: do we allow "*" name pattern? Feels like this should not be allowed,
-	// TODO: otherwise, what is the point if you can just say "*" and everything matches?
-	// TODO: double check!
 
 	// no "." in pattern or fqdn
 	if len(patternTokens) == 1 || len(fqdnTokens) == 1 {
