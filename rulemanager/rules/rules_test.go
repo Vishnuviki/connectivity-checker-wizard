@@ -39,6 +39,7 @@ var _ = Describe("Testing Rules", func() {
 			Expect(responseData.TemplateFormAction).To(Equal("/rule/networkPolicyRule"))
 		})
 
+		// TODO: Improve the test by using Mock Cilium client and return success response.
 		It("Should call nextRule Execute() method if the destinationAddress is a FQDN", func() {
 			inputData.DestinationAddress = "sky.slack.com"
 			responseData := validationRule.Execute(*inputData)
