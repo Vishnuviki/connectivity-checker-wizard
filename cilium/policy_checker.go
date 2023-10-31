@@ -9,6 +9,7 @@ import (
 	v2 "github.com/cilium/cilium/pkg/k8s/apis/cilium.io/v2"
 	cilium_clientset "github.com/cilium/cilium/pkg/k8s/client/clientset/versioned"
 	cilium_v2 "github.com/cilium/cilium/pkg/k8s/client/clientset/versioned/typed/cilium.io/v2"
+	"github.com/cilium/cilium/pkg/policy/api"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	rest "k8s.io/client-go/rest"
 )
@@ -50,18 +51,45 @@ func (c *InClusterCiliumPolicyChecker) CheckIPAllowedByPolicyInNamespace(ip stri
 		for _, egressRule := range policy.Spec.Egress {
 			// Check each CIDR in the egressRule
 			for _, cidr := range egressRule.ToCIDR {
-				_, ipNet, err := net.ParseCIDR(string(cidr))
-				if err != nil {
-					// this should never happen, unless cilium allows invalid CIDRs?
-					return false, err
+				if isCIDRMatch(string(cidr), ip) {
+					return true, nil
 				}
-				if ipNet.Contains(net.ParseIP(ip)) {
+			}
+			for _, cidrSet := range egressRule.ToCIDRSet {
+				if isCIDRSetMatch(cidrSet, ip) {
 					return true, nil
 				}
 			}
 		}
 	}
 	return false, nil
+}
+
+func isCIDRMatch(cidr string, ip string) bool {
+	_, ipNet, err := net.ParseCIDR(cidr)
+	if err != nil {
+		// this should never happen, unless cilium allows invalid CIDRs?
+		log.Printf("Error parsing CIDR '%s', error: %s\n", cidr, err.Error())
+		return false
+	}
+	if ipNet.Contains(net.ParseIP(ip)) {
+		return true
+	}
+	return false
+}
+
+func isCIDRSetMatch(cidrSet api.CIDRRule, ip string) bool {
+	cidr := string(cidrSet.Cidr)
+	if !isCIDRMatch(cidr, ip) {
+		return false
+	}
+	for _, ec := range cidrSet.ExceptCIDRs {
+		exceptCidr := string(ec)
+		if isCIDRMatch(exceptCidr, ip) {
+			return false
+		}
+	}
+	return true
 }
 
 func (c *InClusterCiliumPolicyChecker) CheckFQDNAllowedByPolicyInNamespace(fqdn string, namespace string) (bool, error) {
@@ -144,7 +172,6 @@ func isPatternMatch(fqdn string, matchPattern string) bool {
 
 		// not the first token
 		if i > 0 {
-			// TODO: do we allow "*sub" or "sub*" matches for tokens other than the first?
 			if patternToken == "*" {
 				continue
 			}
@@ -162,7 +189,7 @@ func isPatternMatch(fqdn string, matchPattern string) bool {
 			if strings.HasPrefix(patternToken, "*") {
 				return strings.HasSuffix(fqdnToken, patternToken[1:])
 			}
-			//sub* case
+			// "sub*" case
 			if strings.HasSuffix(patternToken, "*") {
 				return strings.HasPrefix(fqdnToken, patternToken[:len(patternToken)-1])
 			}

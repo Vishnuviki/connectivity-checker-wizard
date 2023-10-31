@@ -2,6 +2,7 @@ package cilium
 
 import (
 	"context"
+	"fmt"
 
 	v2 "github.com/cilium/cilium/pkg/k8s/apis/cilium.io/v2"
 	cilium_v2 "github.com/cilium/cilium/pkg/k8s/client/clientset/versioned/typed/cilium.io/v2"
@@ -15,6 +16,16 @@ type StubbedCiliumNetworkPolicyGetter struct {
 	fqdnNames []string
 	fqdnPatterns []string
 	cidrs []string
+	cidrSets []cidrSet
+}
+
+type cidrSet struct {
+	cidr string
+	exceptCidrs []string
+}
+
+func (c cidrSet) String() string {
+	return fmt.Sprintf("{cidr: %s, exceptCidrs: %s", c.cidr, c.exceptCidrs)
 }
 
 type StubbedCiliumNetworkPolicyInterface struct {
@@ -53,6 +64,10 @@ func (s *StubbedCiliumNetworkPolicyInterface) List(ctx context.Context, opts v1.
 		cpl.Items[0].Spec.Egress[0].ToCIDR = toCIDRs(s.stub.cidrs)
 	}
 
+	if len(s.stub.cidrSets) > 0 {
+		cpl.Items[0].Spec.Egress[0].ToCIDRSet = toCIDRSet(s.stub.cidrSets)
+	}
+
 	return cpl, nil
 }
 
@@ -75,30 +90,18 @@ func toCIDRs(cidrs []string) []api.CIDR {
 	return cidrSelectors
 }
 
-// example network policy:
-// var defaultPolicyList *v2.CiliumNetworkPolicyList = &v2.CiliumNetworkPolicyList{
-// 	Items: []v2.CiliumNetworkPolicy{
-// 		{
-// 			Spec: &api.Rule{
-// 				Egress: []api.EgressRule{
-// 					{
-// 						ToFQDNs: []api.FQDNSelector{
-// 							{
-// 								MatchName: "www.bbc.co.uk",
-// 								MatchPattern: "*.slack.com",
-// 							},
-// 						},
-// 						EgressCommonRule: api.EgressCommonRule{
-// 							ToCIDR: []api.CIDR{
-// 								"0.0.0.0/0",
-// 							},
-// 						},
-// 					},
-// 				},
-// 			},
-// 		},
-// 	},
-// }
+func toCIDRSet(cidrSets []cidrSet) api.CIDRRuleSlice {
+	var cidrRuleSlice api.CIDRRuleSlice
+	for _, cs := range cidrSets {
+		var exceptCIDRs []api.CIDR
+		for _, ec := range cs.exceptCidrs {
+			exceptCIDRs = append(exceptCIDRs, api.CIDR(ec))
+		}
+		cidrRule := api.CIDRRule{ Cidr: api.CIDR(cs.cidr), ExceptCIDRs: exceptCIDRs}
+		cidrRuleSlice = append(cidrRuleSlice, cidrRule)
+	}
+	return cidrRuleSlice
+}
 
 // ignore these, only to satisfy the interface, we only care about the List method
 func (s *StubbedCiliumNetworkPolicyInterface) Create(ctx context.Context, ciliumNetworkPolicy *v2.CiliumNetworkPolicy, opts v1.CreateOptions) (*v2.CiliumNetworkPolicy, error) {return nil, nil}

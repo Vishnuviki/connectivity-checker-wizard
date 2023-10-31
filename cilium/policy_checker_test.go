@@ -134,3 +134,50 @@ func TestCIDRMatch(t *testing.T) {
 		}
 	}
 }
+
+func TestCIDRSetMatch(t *testing.T) {
+	testCases := []struct {
+		cidrSet     cidrSet
+		ipToMatch   string
+		shouldMatch bool
+	}{
+		{
+			cidrSet:     cidrSet{cidr: "0.0.0.0/0", exceptCidrs: []string{"172.21.20.0/22"}},
+			ipToMatch:   "10.0.0.10",
+			shouldMatch: true,
+		},
+		{
+			cidrSet:     cidrSet{cidr: "0.0.0.0/0", exceptCidrs: []string{"172.21.20.0/22"}},
+			ipToMatch:   "172.21.20.10",
+			shouldMatch: false,
+		},
+		{
+			cidrSet:     cidrSet{cidr: "10.0.0.0/8", exceptCidrs: []string{}},
+			ipToMatch:   "172.21.20.10",
+			shouldMatch: false,
+		},
+		{
+			cidrSet:     cidrSet{cidr: "172.31.0.0/16", exceptCidrs: []string{"172.21.20.0/22"}},
+			ipToMatch:   "172.21.20.10",
+			shouldMatch: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		stub := &StubbedCiliumNetworkPolicyGetter{
+			cidrSets: []cidrSet{tc.cidrSet},
+		}
+		pc := NewInClusterCiliumPolicyChecker(stub)
+
+		match, err := pc.CheckIPAllowedByPolicyInNamespace(tc.ipToMatch, "namespace")
+		if err != nil {
+			t.Errorf("Error checking IP %s, cidrSet: %s, error: %s", tc.ipToMatch, tc.cidrSet, err.Error())
+		}
+		if tc.shouldMatch && !match {
+			t.Errorf("IP %s should match cidrSet %s, but it did not", tc.ipToMatch, tc.cidrSet)
+		}
+		if !tc.shouldMatch && match {
+			t.Errorf("IP %s should not match cidrSet %s, but it did", tc.ipToMatch, tc.cidrSet)
+		}
+	}
+}
