@@ -7,7 +7,7 @@ import (
 
 	"conectivity-checker-wizard/constants"
 	"conectivity-checker-wizard/models"
-	"conectivity-checker-wizard/rulemanager/handler"
+	"conectivity-checker-wizard/rulemanager/executor"
 	"conectivity-checker-wizard/utils"
 
 	"github.com/gin-contrib/sessions"
@@ -26,7 +26,7 @@ func (mc *MainController) Home(c *gin.Context) {
 	inputData := session.Get("inputData")
 	session.Save()
 	c.HTML(http.StatusOK, "home.tmpl", gin.H{
-		"flashes": flashes,
+		"flashes":   flashes,
 		"inputData": inputData,
 	})
 }
@@ -52,14 +52,14 @@ func (mc *MainController) HandleValidationRequest(c *gin.Context) {
 	} else {
 		session.Set("inputData", inputData)
 		session.Save()
-		responseData := handler.HandleRules(c, constants.VALIDATION_RULE)
+		responseData := executor.HandleRules(c, constants.VALIDATION_RULE)
 		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	}
 }
 
 func (mc *MainController) HandleRuleRequest(c *gin.Context) {
 	if ruleName := c.Param("ruleName"); ruleName != "" {
-		responseData := handler.HandleRules(c, ruleName)
+		responseData := executor.HandleRules(c, ruleName)
 		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	} else {
 		responseData := utils.BuildInvalidResponseData()
