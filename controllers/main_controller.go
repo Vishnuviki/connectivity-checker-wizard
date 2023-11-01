@@ -34,27 +34,33 @@ func (mc *MainController) Home(c *gin.Context) {
 func (mc *MainController) HandleValidationRequest(c *gin.Context) {
 	var inputData models.InputData
 	session := sessions.Default(c)
-	if err := c.ShouldBind(&inputData); err != nil {
+	err := c.ShouldBind(&inputData)
+	session.Set("inputData", inputData)
+	session.Save()
+
+	if err != nil {
 		session.AddFlash("Validation failed: " + err.Error())
 		session.Save()
 		c.Redirect(http.StatusFound, "/")
 		return
-	} else if !inputData.IsDestinationAddressValid() {
-		session.AddFlash(constants.INVALID_DESTINATION_ADDRESS_MESSAGE)
-		session.Save()
-		c.Redirect(http.StatusFound, "/")
-		return
-	} else if !inputData.IsDestinationPortValid() {
-		session.AddFlash(constants.INVALID_PORT_NUMBER_MESSAGE)
-		session.Save()
-		c.Redirect(http.StatusFound, "/")
-		return
-	} else {
-		session.Set("inputData", inputData)
-		session.Save()
-		responseData := executor.ExecuteRules(c, constants.VALIDATION_RULE)
-		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	}
+
+	if !inputData.IsDestinationAddressValid() {
+		session.AddFlash("Validation failed: Destination address not valid, must be IP or FQDN")
+		session.Save()
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
+
+	if !inputData.IsDestinationPortValid() {
+		session.AddFlash("Validation failed: Invalid Destination Port")
+		session.Save()
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
+
+	responseData := executor.ExecuteRules(c, constants.VALIDATION_RULE)
+	c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 }
 
 func (mc *MainController) HandleRuleRequest(c *gin.Context) {

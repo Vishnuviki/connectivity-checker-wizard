@@ -9,6 +9,4 @@ const (
 
 	// response messages
 	PAGE_NOT_FOUND_MESSAGE              = "Page Not Found"
-	INVALID_DESTINATION_ADDRESS_MESSAGE = "Validation failed: Destination address not valid, must be IP or FQDN"
-	INVALID_PORT_NUMBER_MESSAGE         = "Validation failed: Invalid Destination Port"
 )

@@ -34,3 +34,25 @@ func TestInputData(t *testing.T) {
 		}
 	}
 }
+
+func TestInputDataIsDestinationPortValid(t *testing.T) {
+	cases := []struct {
+		namespace          string
+		port               string
+		destinationAddress string
+
+		expectIsValidPort bool
+	}{
+		{"ns1", "80", "1.2.3.4", true},
+		{"ns1", "0", "1.2.3.4", false},
+		{"ns1", "99999", "1.2.3.4", false},
+		{"ns1", "abc", "1.2.3.4", false},
+	}
+
+	for _, c := range cases {
+		inputData := NewInputData(c.namespace, c.port, c.destinationAddress)
+		if inputData.IsDestinationPortValid() != c.expectIsValidPort {
+			t.Errorf("expected inputData.isDestinationPortValid() to be %t, got %t, port: %s", c.expectIsValidPort, inputData.IsDestinationPortValid(), c.port)
+		}
+	}
+}
