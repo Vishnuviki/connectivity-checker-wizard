@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
+	"conectivity-checker-wizard/cilium"
 	"conectivity-checker-wizard/models"
 	i "conectivity-checker-wizard/rulemanager/interfaces"
-	"conectivity-checker-wizard/services/cilium"
 )
 
 type NetworkPolicyRule struct {

@@ -3,11 +3,11 @@ package builder
 import (
 	"log"
 
+	"conectivity-checker-wizard/cilium"
 	c "conectivity-checker-wizard/constants"
 	i "conectivity-checker-wizard/rulemanager/interfaces"
 	"conectivity-checker-wizard/rulemanager/rulemap"
 	"conectivity-checker-wizard/rulemanager/rules"
-	"conectivity-checker-wizard/services/cilium"
 )
 
 var ruleMap = rulemap.GetInstance()
