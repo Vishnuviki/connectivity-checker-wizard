@@ -1,9 +1,10 @@
 package main
 
 import (
-	"conectivity-checker-wizard/controllers"
-	"conectivity-checker-wizard/rulemanager/handler"
 	"os"
+
+	"conectivity-checker-wizard/config"
+	"conectivity-checker-wizard/controllers"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -20,9 +21,6 @@ func main() {
 	store := cookie.NewStore([]byte("secret"))
 	router.Use(sessions.Sessions("mysession", store))
 
-	// build rules and create RuleMap
-	handler.BuildRuleMap()
-
 	// load all the templates
 	router.LoadHTMLGlob("views/templates/*")
 
@@ -33,9 +31,11 @@ func main() {
 	mainController := new(controllers.MainController)
 	router.GET("/", mainController.Home)
 	router.GET("/rule/*any", mainController.Error)
-	// router.GET("/cilium", mainController.CiliumPolicies)
 	router.POST("/validate", mainController.HandleValidationRequest)
 	router.POST("/rule/:ruleName", mainController.HandleRuleRequest)
+
+	// configure the app
+	config.Configure()
 
 	router.Run(":8080")
 }
