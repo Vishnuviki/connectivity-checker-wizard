@@ -1,7 +1,6 @@
 package rules
 
 import (
-	"fmt"
 	"testing"
 
 	"conectivity-checker-wizard/cilium"
@@ -45,7 +44,6 @@ var _ = Describe("Testing Rules", func() {
 			responseData := validationRule.Execute(*inputData)
 			Expect(responseData.HTTPStatus).To(Equal(200))
 			Expect(responseData.TemplateName).To(Equal("response.tmpl"))
-			fmt.Println(responseData.TemplateContent)
 			Expect(responseData.TemplateContent).To(Equal(buildNoEgressPolicyContent()))
 		})
 
@@ -119,10 +117,10 @@ func getPolicyChecker() cilium.PolicyChecker {
 }
 
 func buildValidationRuleResponseContent() string {
-	return fmt.Sprintf("Are you sure that your destination (%v) is an IP address and not a hostname? "+
-		"The network filtering logic works based on how exactly "+
-		"your applicaton reaches out to an external destination. If your "+
-		"destination is configured as a raw IP, then you can continue!!", "192.168.1.0")
+	return "Are you sure that your destination (192.168.1.0) is an IP address and not a hostname? " +
+		"The network filtering logic works based on how exactly " +
+		"your applicaton reaches out to an external destination. If your " +
+		"destination is configured as a raw IP, then you can continue!!"
 }
 
 func buildNoEgressPolicyContent() string {
