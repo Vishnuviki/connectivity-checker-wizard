@@ -1,6 +1,8 @@
 package models
 
 import (
+	"strconv"
+
 	gonet "github.com/THREATINT/go-net"
 )
 
@@ -28,4 +30,12 @@ func (i *InputData) IsDestinationAddressIP() bool {
 
 func (i *InputData) IsDestinationAddressValid() bool {
 	return i.IsDestinationAddressFQDN() || i.IsDestinationAddressIP()
+}
+
+func (i *InputData) IsDestinationPortValid() bool {
+	port, err := strconv.Atoi(i.DestinationPort)
+	if err != nil {
+		return false
+	}
+	return port >= 1 && port <= 65535
 }
