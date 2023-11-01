@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"conectivity-checker-wizard/cilium"
 	c "conectivity-checker-wizard/constants"
 	"conectivity-checker-wizard/models"
 	i "conectivity-checker-wizard/rulemanager/interfaces"
@@ -39,13 +40,13 @@ var _ = Describe("Testing Rules", func() {
 			Expect(responseData.TemplateFormAction).To(Equal("/rule/networkPolicyRule"))
 		})
 
-		// TODO: Improve the test by using Mock Cilium client and return success response.
-		It("Should call nextRule Execute() method if the destinationAddress is a FQDN", func() {
+		It("Should call networkPolicyRule Execute() method if the destinationAddress is a FQDN", func() {
 			inputData.DestinationAddress = "sky.slack.com"
 			responseData := validationRule.Execute(*inputData)
 			Expect(responseData.HTTPStatus).To(Equal(200))
 			Expect(responseData.TemplateName).To(Equal("response.tmpl"))
-			Expect(responseData.TemplateContent).To(Equal(buildErrorResponseContent()))
+			fmt.Println(responseData.TemplateContent)
+			Expect(responseData.TemplateContent).To(Equal(buildNoEgressPolicyContent()))
 		})
 
 		It("Should return a ResponseData with a message related to destinationAddress", func() {
@@ -101,8 +102,20 @@ var _ = Describe("Testing Rules", func() {
 func buildValidationRule() i.Rule {
 	validationRule := new(ValidationRule)
 	validationRule.SetName(c.VALIDATION_RULE)
-	validationRule.SetNextRule(new(NetworkPolicyRule))
+	validationRule.SetNextRule(builNetworkPoliyRule())
 	return validationRule
+}
+
+func builNetworkPoliyRule() i.Rule {
+	networkPolicyRule := new(NetworkPolicyRule)
+	networkPolicyRule.SetName(c.NETWORK_POLICY_RULE)
+	networkPolicyRule.SetPolicyChecker(getPolicyChecker())
+	return networkPolicyRule
+}
+
+func getPolicyChecker() cilium.PolicyChecker {
+	stub := &cilium.StubbedCiliumNetworkPolicyGetter{}
+	return cilium.NewInClusterCiliumPolicyChecker(stub)
 }
 
 func buildValidationRuleResponseContent() string {
@@ -112,9 +125,8 @@ func buildValidationRuleResponseContent() string {
 		"destination is configured as a raw IP, then you can continue!!", "192.168.1.0")
 }
 
-func buildErrorResponseContent() string {
-	return "We apologize for the inconvenience, as we're currently encountering some technical issues. " +
-		"Please get in touch with #core-support channel for further assistance."
+func buildNoEgressPolicyContent() string {
+	return "Oops, There is no network policy allowing this egress traffic - link-to-docs-about-egress-policy"
 }
 
 func buildDNSLookUPRule() i.Rule {
