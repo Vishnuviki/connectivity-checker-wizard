@@ -4,7 +4,6 @@ import (
 	"encoding/gob"
 	"log"
 	"net/http"
-	"strconv"
 
 	"conectivity-checker-wizard/constants"
 	"conectivity-checker-wizard/models"
@@ -24,13 +23,11 @@ type MainController struct{}
 func (mc *MainController) Home(c *gin.Context) {
 	session := sessions.Default(c)
 	flashes := session.Flashes()
-	// TODO: I think its better dont display the values, when the User clicks on the Home button
-	// then the form should be clean, so for that reason we don't show the input values??
-	// inputData := session.Get("inputData")
+	inputData := session.Get("inputData")
 	session.Save()
 	c.HTML(http.StatusOK, "home.tmpl", gin.H{
 		"flashes": flashes,
-		// "inputData": inputData,
+		"inputData": inputData,
 	})
 }
 
@@ -47,7 +44,7 @@ func (mc *MainController) HandleValidationRequest(c *gin.Context) {
 		session.Save()
 		c.Redirect(http.StatusFound, "/")
 		return
-	} else if !IsValidPortNumber(inputData.DestinationPort) {
+	} else if !inputData.IsDestinationPortValid() {
 		session.AddFlash(constants.INVALID_PORT_NUMBER_MESSAGE)
 		session.Save()
 		c.Redirect(http.StatusFound, "/")
@@ -75,19 +72,3 @@ func (mc *MainController) Error(c *gin.Context) {
 	responseData := utils.BuildInvalidResponseData()
 	c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 }
-
-func IsValidPortNumber(portStr string) bool {
-	port, err := strconv.Atoi(portStr)
-	if err != nil {
-		return false
-	}
-	return port >= 1 && port <= 65535
-}
-
-// func (mc *MainController) CiliumPolicies(c *gin.Context) {
-// 	policies, err := cilium.GetCiliumNetworkPolicies("default")
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, err.Error())
-// 	}
-// 	c.JSON(http.StatusOK, policies)
-// }
