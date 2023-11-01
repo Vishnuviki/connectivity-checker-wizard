@@ -52,14 +52,14 @@ func (mc *MainController) HandleValidationRequest(c *gin.Context) {
 	} else {
 		session.Set("inputData", inputData)
 		session.Save()
-		responseData := executor.HandleRules(c, constants.VALIDATION_RULE)
+		responseData := executor.ExecuteRules(c, constants.VALIDATION_RULE)
 		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	}
 }
 
 func (mc *MainController) HandleRuleRequest(c *gin.Context) {
 	if ruleName := c.Param("ruleName"); ruleName != "" {
-		responseData := executor.HandleRules(c, ruleName)
+		responseData := executor.ExecuteRules(c, ruleName)
 		c.HTML(responseData.HTTPStatus, responseData.TemplateName, responseData)
 	} else {
 		responseData := utils.BuildInvalidResponseData()

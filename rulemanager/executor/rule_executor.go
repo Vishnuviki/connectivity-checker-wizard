@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func HandleRules(c *gin.Context, ruleName string) models.ResponseData {
+func ExecuteRules(c *gin.Context, ruleName string) models.ResponseData {
 	var ruleMap = rulemap.GetInstance()
 	if rule, ok := ruleMap.GetRuleByName(ruleName); ok {
 		session := sessions.Default(c)
